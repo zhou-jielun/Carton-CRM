@@ -1,0 +1,79 @@
+{
+  "name": "carton-crm",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI全自动外贸获客助手CRM",
+  "main": "electron/main.js",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "npm -w backend run dev",
+    "dev:frontend": "npm -w frontend run dev",
+    "build": "npm -w backend run build && npm -w frontend run build",
+    "db:migrate": "npm -w backend run db:migrate",
+    "db:push": "npm -w backend run db:push",
+    "db:generate": "npm -w backend run db:generate",
+    "electron:dev": "concurrently -k \"npm run dev:backend\" \"sleep 2 && npm run dev:frontend\" \"wait-on http://localhost:5173 && node_modules/electron/dist/Electron.app/Contents/MacOS/Electron .\"",
+    "electron:build": "npm run build && electron-builder --config",
+    "electron:start": "npm run build && node_modules/electron/dist/Electron.app/Contents/MacOS/Electron ."
+  },
+  "build": {
+    "appId": "com.carton-crm.app",
+    "productName": "Carton CRM",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "electron/**/*",
+      "backend/dist/**/*",
+      "backend/.env",
+      "backend/prisma/**/*",
+      "frontend/dist/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "node_modules/.prisma/client/",
+        "to": "prisma-client",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.business",
+      "icon": null
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": null
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Office"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "language": "2052"
+    }
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "electron": "^42.2.0",
+    "electron-builder": "^26.8.1",
+    "wait-on": "^7.2.0"
+  }
+}

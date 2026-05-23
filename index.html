@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -223,6 +223,36 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helv
 .cust-card:hover {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   transform: translateY(-2px);
+}
+.cust-card:hover .cust-card-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+.cust-card-actions {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #f1f5f9;
+  justify-content: flex-end;
+}
+.cust-card-actions button {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  background: #f1f5f9;
+  color: #475569;
+  font-weight: 500;
+  transition: background 0.15s;
+}
+.cust-card-actions button:hover {
+  background: #e2e8f0;
+  color: #1e293b;
 }
 .cust-card-header {
   display: flex;
@@ -605,35 +635,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helv
 .faq-star { cursor: pointer; color: #C7C7CC; transition: var(--transition); flex-shrink: 0; }
 .faq-star.active { color: var(--apple-blue); fill: var(--apple-blue); }
 .faq-star:hover { transform: scale(1.15); }
-/* ===== 素材库 ===== */
-.upload-zone { border: 2px dashed rgba(0,0,0,0.12); border-radius: var(--radius); padding: 40px 20px; text-align: center; cursor: pointer; transition: var(--transition); background: rgba(0,0,0,0.02); }
-.upload-zone:hover { border-color: var(--apple-blue); background: rgba(0,122,255,0.04); }
-.upload-zone.dragover { border-color: var(--apple-blue); background: rgba(0,122,255,0.08); }
-.upload-zone svg { width: 40px; height: 40px; color: #C7C7CC; margin-bottom: 12px; }
-.upload-zone p { font-size: 14px; color: var(--text-secondary); }
-.upload-progress { height: 4px; background: rgba(0,0,0,0.06); border-radius: 2px; margin-top: 12px; overflow: hidden; }
-.upload-progress-bar { height: 100%; background: var(--apple-blue); border-radius: 2px; transition: width 0.3s ease; width: 0; }
-.material-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; }
-.material-item { position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 1; background: rgba(0,0,0,0.04); cursor: pointer; transition: var(--transition); }
-.material-item:hover { transform: scale(1.02); box-shadow: var(--shadow-hover); }
-.material-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.material-item .mat-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.6)); padding: 8px; opacity: 0; transition: var(--transition); }
-.material-item:hover .mat-overlay { opacity: 1; }
-.material-item .mat-name { color: #fff; font-size: 12px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.material-item .mat-actions { display: flex; gap: 4px; margin-top: 6px; position: absolute; top: 6px; right: 6px; opacity: 0; transition: var(--transition); }
-.material-item:hover .mat-actions { opacity: 1; }
-.mat-action-btn { width: 28px; height: 28px; border-radius: 50%; border: none; background: rgba(0,0,0,0.5); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: var(--transition); }
-.mat-action-btn:hover { background: rgba(0,0,0,0.7); }
-.watermark-area { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.watermark-preview { border-radius: 12px; overflow: hidden; background: repeating-conic-gradient(rgba(0,0,0,0.04) 0% 25%, transparent 0% 50%) 0 0 / 20px 20px; min-height: 120px; display: flex; align-items: center; justify-content: center; }
-.watermark-preview img { max-width: 100%; max-height: 200px; object-fit: contain; }
-.tag-custom { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: var(--transition); background: rgba(0,0,0,0.04); color: var(--text-secondary); }
-.tag-custom.active { background: rgba(0,122,255,0.12); color: var(--apple-blue); }
-.tag-custom:hover { background: rgba(0,122,255,0.08); }
-/* 深色模式补充 */
-.dark-mode .upload-zone { border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.03); }
-.dark-mode .upload-zone:hover { border-color: var(--apple-blue); background: rgba(0,122,255,0.08); }
-.dark-mode .material-item { background: rgba(255,255,255,0.06); }
+/* ===== 深色模式补充 ===== */
 .dark-mode .faq-card { background: var(--card); }
 .dark-mode .faq-hue-0 { border-left-color: #A8987A; }
 .dark-mode .faq-hue-1 { border-left-color: #7A90A8; }
@@ -663,6 +665,481 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helv
 .dark-mode .watermark-preview { background: repeating-conic-gradient(rgba(255,255,255,0.08) 0% 25%, transparent 0% 50%) 0 0 / 20px 20px; }
 .dark-mode .tag-custom { background: rgba(255,255,255,0.06); }
 .dark-mode .tag-custom.active { background: rgba(0,122,255,0.2); }
+/* ===== 纸箱计算 ===== */
+.calc-mode-toggle { display: flex; gap: 4px; background: rgba(0,0,0,0.04); border-radius: 10px; padding: 3px; margin-bottom: 20px; }
+.calc-mode-btn { flex: 1; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; color: var(--text-secondary); border: none; background: transparent; }
+.calc-mode-btn.active { background: #fff; color: var(--text-primary); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.dark-mode .calc-mode-toggle { background: rgba(255,255,255,0.06); }
+.dark-mode .calc-mode-btn.active { background: rgba(255,255,255,0.1); }
+.calc-form { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.calc-form-group { display: flex; flex-direction: column; gap: 6px; }
+.calc-form-label { font-size: 13px; font-weight: 500; color: var(--text-secondary); }
+.calc-form-input { padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.08); background: rgba(0,0,0,0.02); font-size: 14px; color: var(--text-primary); outline: none; transition: all 0.2s ease; font-family: inherit; }
+.calc-form-input:focus { border-color: var(--apple-blue); background: #fff; box-shadow: 0 0 0 3px rgba(0,122,255,0.15); }
+.dark-mode .calc-form-input { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: #fff; }
+.dark-mode .calc-form-input:focus { background: rgba(255,255,255,0.08); }
+.calc-tongue { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding: 16px; background: rgba(0,0,0,0.02); border-radius: 12px; }
+.calc-tongue label { font-size: 13px; color: var(--text-secondary); white-space: nowrap; }
+.calc-tongue input[type="range"] { flex: 1; accent-color: var(--apple-blue); }
+.calc-tongue-value { font-size: 14px; font-weight: 600; color: var(--apple-blue); min-width: 60px; text-align: center; }
+.calc-result { margin-top: 24px; padding: 20px; background: linear-gradient(135deg, rgba(0,122,255,0.05) 0%, rgba(52,199,89,0.05) 100%); border-radius: 16px; border: 1px solid rgba(0,122,255,0.1); }
+.calc-result-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--text-primary); }
+.calc-result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.calc-result-item { padding: 12px 16px; background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.dark-mode .calc-result-item { background: rgba(255,255,255,0.05); }
+.calc-result-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+.calc-result-value { font-size: 24px; font-weight: 700; color: var(--apple-blue); letter-spacing: -0.5px; }
+.calc-result-unit { font-size: 14px; font-weight: 500; color: var(--text-secondary); margin-left: 4px; }
+.calc-formula { margin-top: 16px; padding: 12px 16px; background: rgba(0,0,0,0.02); border-radius: 10px; font-size: 13px; color: var(--text-secondary); line-height: 1.8; }
+.calc-formula code { background: rgba(0,122,255,0.1); color: var(--apple-blue); padding: 2px 6px; border-radius: 4px; font-size: 12px; font-family: 'SF Mono', Monaco, Consolas, monospace; }
+.calc-empty { text-align: center; padding: 40px 20px; font-size: 14px; color: var(--text-secondary); }
+.calc-empty svg { width: 48px; height: 48px; color: #C7C7CC; margin-bottom: 12px; }
+/* ===== 纸箱3D预览 ===== */
+.carton-preview { margin-top: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 16px; background: linear-gradient(135deg, rgba(196,149,106,0.08) 0%, rgba(168,123,79,0.05) 100%); border-radius: 16px; border: 1px solid rgba(196,149,106,0.15); }
+.carton-preview svg { max-width: 100%; height: auto; }
+.carton-dim-label { font-size: 12px; font-weight: 600; fill: #5C3D1E; }
+.carton-dim-line { stroke: #5C3D1E; stroke-width: 1.2; fill: none; stroke-dasharray: 3,2; }
+.carton-view-btns { display: flex; gap: 6px; justify-content: center; margin-bottom: 10px; flex-wrap: wrap; }
+.carton-view-btn { padding: 5px 14px; border-radius: 8px; border: 1px solid rgba(0,122,255,0.25); background: rgba(0,122,255,0.06); color: #007AFF; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s ease; }
+.carton-view-btn:hover { background: rgba(0,122,255,0.12); }
+.carton-view-btn.active { background: #007AFF; color: #fff; border-color: #007AFF; }
+.dark-mode .carton-preview { background: linear-gradient(135deg, rgba(196,149,106,0.10) 0%, rgba(168,123,79,0.06) 100%); border-color: rgba(196,149,106,0.20); }
+.dark-mode .carton-dim-label { fill: #D4B896; }
+.dark-mode .carton-dim-line { stroke: #D4B896; }
+.dark-mode .carton-view-btn { background: rgba(0,122,255,0.15); color: #5AC8FA; border-color: rgba(90,200,250,0.3); }
+.dark-mode .carton-view-btn.active { background: #5AC8FA; color: #000; border-color: #5AC8FA; }
+/* ===== 模拟沟通 ===== */
+.sim-setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.sim-setup-item { display: flex; flex-direction: column; gap: 6px; }
+.sim-setup-label { font-size: 13px; font-weight: 500; color: var(--text-secondary); }
+.sim-setup-select { padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.08); background: rgba(0,0,0,0.02); font-size: 14px; color: var(--text-primary); outline: none; transition: all 0.2s ease; font-family: inherit; cursor: pointer; }
+.sim-setup-select:focus { border-color: var(--apple-blue); background: #fff; box-shadow: 0 0 0 3px rgba(0,122,255,0.15); }
+.dark-mode .sim-setup-select { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: #fff; }
+.dark-mode .sim-setup-select:focus { background: rgba(255,255,255,0.08); }
+.sim-chat-area { display: flex; flex-direction: column; height: 500px; border: 1px solid rgba(0,0,0,0.06); border-radius: 16px; overflow: hidden; background: var(--card); }
+.dark-mode .sim-chat-area { border-color: rgba(255,255,255,0.08); }
+.sim-chat-header { padding: 14px 20px; background: linear-gradient(135deg, rgba(0,122,255,0.08), rgba(52,199,89,0.08)); border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between; }
+.dark-mode .sim-chat-header { border-bottom-color: rgba(255,255,255,0.08); }
+.sim-chat-customer { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+.sim-chat-meta { font-size: 12px; color: var(--text-secondary); }
+.sim-chat-body { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; background: rgba(0,0,0,0.01); }
+.dark-mode .sim-chat-body { background: rgba(255,255,255,0.02); }
+.sim-msg { max-width: 75%; display: flex; flex-direction: column; animation: fadeIn 0.3s ease; }
+.sim-msg-user { align-self: flex-end; }
+.sim-msg-cust { align-self: flex-start; }
+.sim-msg-bubble { padding: 10px 16px; border-radius: 18px; font-size: 14px; line-height: 1.6; }
+.sim-msg-user .sim-msg-bubble { background: var(--apple-blue); color: #fff; border-bottom-right-radius: 4px; }
+.sim-msg-cust .sim-msg-bubble { background: rgba(0,0,0,0.05); color: var(--text-primary); border-bottom-left-radius: 4px; }
+.dark-mode .sim-msg-cust .sim-msg-bubble { background: rgba(255,255,255,0.08); }
+.sim-msg-time { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+.sim-msg-user .sim-msg-time { text-align: right; }
+.sim-chat-footer { padding: 12px 16px; border-top: 1px solid rgba(0,0,0,0.06); display: flex; gap: 8px; align-items: flex-end; }
+.dark-mode .sim-chat-footer { border-top-color: rgba(255,255,255,0.08); }
+.sim-chat-input { flex: 1; padding: 10px 14px; border-radius: 20px; border: 1px solid rgba(0,0,0,0.08); background: rgba(0,0,0,0.02); font-size: 14px; color: var(--text-primary); outline: none; resize: none; font-family: inherit; min-height: 42px; max-height: 100px; }
+.sim-chat-input:focus { border-color: var(--apple-blue); background: #fff; box-shadow: 0 0 0 3px rgba(0,122,255,0.15); }
+.dark-mode .sim-chat-input { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: #fff; }
+.dark-mode .sim-chat-input:focus { background: rgba(255,255,255,0.08); }
+.sim-chat-send { width: 42px; height: 42px; border-radius: 50%; border: none; background: var(--apple-blue); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s ease; }
+.sim-chat-send:hover { transform: scale(1.05); box-shadow: 0 2px 8px rgba(0,122,255,0.3); }
+.sim-chat-send:active { transform: scale(0.98); }
+.sim-chat-actions { display: flex; gap: 8px; padding: 10px 16px; border-top: 1px solid rgba(0,0,0,0.04); background: rgba(0,0,0,0.01); }
+.sim-btn-suggest { padding: 8px 16px; border-radius: 20px; border: 1px solid rgba(0,122,255,0.3); background: rgba(0,122,255,0.06); color: var(--apple-blue); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; font-family: inherit; }
+.sim-btn-suggest:hover { background: rgba(0,122,255,0.12); }
+.sim-btn-end { padding: 8px 16px; border-radius: 20px; border: 1px solid rgba(255,59,48,0.3); background: rgba(255,59,48,0.06); color: var(--apple-red); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; font-family: inherit; margin-left: auto; }
+.sim-btn-end:hover { background: rgba(255,59,48,0.12); }
+.sim-summary { padding: 20px; background: linear-gradient(135deg, rgba(0,122,255,0.05), rgba(52,199,89,0.05)); border-radius: 16px; border: 1px solid rgba(0,122,255,0.1); }
+.sim-summary-title { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.sim-summary-section { margin-bottom: 16px; }
+.sim-summary-section:last-child { margin-bottom: 0; }
+.sim-summary-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.sim-summary-list { list-style: none; padding: 0; margin: 0; }
+.sim-summary-list li { font-size: 13px; color: var(--text-primary); padding: 6px 0; padding-left: 18px; position: relative; line-height: 1.6; }
+.sim-summary-list li::before { content: ''; position: absolute; left: 0; top: 13px; width: 6px; height: 6px; border-radius: 50%; }
+.sim-summary-good li::before { background: var(--apple-green); }
+.sim-summary-bad li::before { background: var(--apple-red); }
+.sim-summary-tip li::before { background: var(--apple-orange); }
+.sim-progress-dots { display: flex; gap: 4px; align-items: center; }
+.sim-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(0,0,0,0.08); }
+.sim-dot.active { background: var(--apple-green); }
+.dark-mode .sim-dot { background: rgba(255,255,255,0.1); }
+@media (max-width: 767px) {
+  .sim-setup-grid { grid-template-columns: 1fr; }
+  .sim-chat-area { height: 400px; }
+  .sim-msg { max-width: 85%; }
+}
+
+/* ===== Wiki 模块样式 ===== */
+.wiki-container { max-width: 1200px; margin: 0 auto; padding: 24px 0; }
+.wiki-search-wrap { display: flex; align-items: center; gap: 8px; background: var(--card); border-radius: var(--radius); padding: 8px 16px; margin-bottom: 24px; box-shadow: var(--shadow); }
+.wiki-search-icon { width: 20px; height: 20px; flex-shrink: 0; color: var(--text-secondary); }
+.wiki-search-input { flex: 1; border: none; outline: none; font-size: 15px; background: transparent; color: var(--text-primary); }
+.wiki-search-clear { width: 28px; height: 28px; border-radius: 50%; border: none; background: rgba(0,0,0,0.06); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); }
+.wiki-grid { display: grid; gap: 24px; grid-template-columns: repeat(4, 1fr); }
+.wiki-card { background: var(--card); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); transition: all 0.2s ease; cursor: pointer; position: relative; border: 2px solid transparent; }
+.wiki-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); }
+.wiki-card-3d { background: #faf8f5; border-radius: 8px; margin-bottom: 12px; overflow: hidden; min-height: 100px; max-height: 140px; display: flex; align-items: center; justify-content: center; }
+.wiki-card-3d svg { width: 100%; height: auto; max-height: 140px; }
+
+/* 图片上传区域 */
+.wiki-card-image {
+  width: 100%;
+  height: 200px;
+  background: #f9f9fb;
+  border-bottom: 1px solid #e5e5ea;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.wiki-upload-placeholder {
+  color: #86868b;
+  font-size: 14px;
+  text-align: center;
+  padding: 20px;
+}
+
+.wiki-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.wiki-diag-image {
+  width: 100%;
+  min-height: 400px;
+  background: #f9f9fb;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  border: 2px dashed #c7c7cc;
+}
+
+.wiki-image-upload-area {
+  color: #86868b;
+  font-size: 16px;
+  text-align: center;
+  padding: 40px;
+}
+
+.wiki-diag-img {
+  max-width: 100%;
+  max-height: 400px;
+  object-fit: contain;
+}
+.wiki-card-body { padding: 12px 0 0; }
+.wiki-card-color-header {
+  width: 100%;
+  height: 120px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+}
+.wiki-card-color-header::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 70%);
+  pointer-events: none;
+}
+.wiki-card-icon { font-size: 36px; z-index: 1; }
+.wiki-card-code-overlay {
+  font-size: 24px;
+  font-weight: 800;
+  color: rgba(0,0,0,0.25);
+  z-index: 1;
+  letter-spacing: 2px;
+}
+.wiki-card-code { font-size: 20px; font-weight: 700; color: var(--apple-blue); margin-bottom: 4px; display: none; }
+.wiki-card-name { font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
+.wiki-card-name-en { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
+.wiki-card-pop { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.wiki-pop-label { color: var(--text-secondary); white-space: nowrap; }
+.wiki-pop-bar { flex: 1; height: 6px; background: rgba(0,0,0,0.06); border-radius: 3px; overflow: hidden; }
+.wiki-pop-fill { height: 100%; background: linear-gradient(90deg, var(--apple-blue), var(--apple-green)); border-radius: 3px; transition: width 0.4s ease; }
+.wiki-pop-val { font-weight: 600; color: var(--apple-blue); min-width: 36px; text-align: right; }
+
+/* 新增纸箱按钮 */
+.wiki-card-add {
+  border: 2px dashed #C7C7CC;
+  background: #FAFAFC;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+  gap: 8px;
+}
+.wiki-card-add:hover {
+  border-color: var(--apple-blue);
+  background: rgba(0,122,255,0.04);
+}
+.wiki-card-add-icon {
+  font-size: 40px;
+  font-weight: 300;
+  color: #C7C7CC;
+  line-height: 1;
+}
+.wiki-card-add:hover .wiki-card-add-icon {
+  color: var(--apple-blue);
+}
+.wiki-card-add-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.wiki-card-add-hint {
+  font-size: 12px;
+  color: #C7C7CC;
+}
+
+/* 模态框 */
+.wiki-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+.wiki-modal {
+  background: var(--card);
+  border-radius: var(--radius);
+  width: 90%;
+  max-width: 480px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  animation: slideUp 0.3s ease;
+}
+.wiki-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.wiki-modal-header h3 { font-size: 17px; font-weight: 600; margin: 0; }
+.wiki-modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0,0,0,0.06);
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+}
+.wiki-modal-body { padding: 20px 24px; }
+.wiki-form-group { margin-bottom: 16px; }
+.wiki-form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+.wiki-form-group input,
+.wiki-form-group textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #E5E5EA;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #FAFAFC;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.wiki-form-group input:focus,
+.wiki-form-group textarea:focus {
+  border-color: var(--apple-blue);
+}
+.wiki-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.wiki-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
+
+/* 自定义纸箱删除按钮 */
+.wiki-custom-delete {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,59,48,0.9);
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+.wiki-card:hover .wiki-custom-delete { display: flex; }
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.wiki-compare-chk { position: absolute; top: 12px; right: 12px; display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-secondary); cursor: pointer; }
+.wiki-compare-chk input[type="checkbox"] { cursor: pointer; }
+.wiki-compare-chk input[type="checkbox"]:disabled + span { opacity: 0.3; }
+.wiki-empty { text-align: center; padding: 60px 20px; color: var(--text-secondary); font-size: 16px; grid-column: 1/-1; }
+/* ========== 详情页上下布局 ========== */
+.wiki-detail { animation: fadeIn 0.3s ease; }
+
+/* 纸箱结构区域 */
+.wiki-structure-section {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+.wiki-section-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.wiki-structure-images {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.wiki-structure-image-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.wiki-structure-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+.wiki-structure-image {
+  width: 100%;
+  min-height: 320px;
+  background: #F9F9FB;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  border: 2px dashed #C7C7CC;
+  transition: all 0.2s ease;
+}
+.wiki-structure-image:hover {
+  border-color: var(--apple-blue);
+  background: rgba(0,122,255,0.02);
+}
+.wiki-structure-image-single {
+  min-height: 400px;
+  max-height: 520px;
+}
+.wiki-image-upload-hint {
+  color: #86868B;
+  font-size: 14px;
+  text-align: center;
+  padding: 20px;
+}
+.wiki-structure-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  max-height: 500px;
+}
+
+/* 参数信息区域 */
+.wiki-params-section {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+.wiki-params-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.wiki-params-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.wiki-detail-structure-text {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  padding: 12px 16px;
+  background: rgba(0,122,255,0.04);
+  border-radius: 8px;
+}
+
+/* 旧的兼容样式 */
+.wiki-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.wiki-detail-diagrams { background: var(--card); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow); }
+.wiki-diag-section { margin-bottom: 20px; }
+.wiki-diag-section:last-child { margin-bottom: 0; }
+.wiki-diag-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+.wiki-diag-svg { background: #faf8f5; border-radius: 8px; overflow: hidden; }
+.wiki-diag-svg svg { display: block; width: 100%; height: auto; }
+.wiki-detail-structure { font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 16px; padding: 12px 16px; background: rgba(0,122,255,0.04); border-radius: 8px; }
+.wiki-detail-section { margin-bottom: 16px; }
+.wiki-detail-section h4 { font-size: 13px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.wiki-cost-stars { font-size: 22px; color: var(--apple-orange); letter-spacing: 4px; }
+.wiki-params-list { }
+.wiki-param-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.wiki-param-label { font-size: 12px; color: var(--text-secondary); width: 72px; flex-shrink: 0; }
+.wiki-param-bar { flex: 1; height: 8px; background: rgba(0,0,0,0.06); border-radius: 4px; overflow: hidden; }
+.wiki-param-fill { height: 100%; background: linear-gradient(90deg, var(--apple-blue), var(--apple-green)); border-radius: 4px; }
+.wiki-param-val { font-size: 12px; font-weight: 600; color: var(--text-primary); min-width: 32px; text-align: right; }
+.wiki-tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+.badge-blue { background: rgba(0,122,255,0.1); color: var(--apple-blue); }
+.badge-green { background: rgba(52,199,89,0.1); color: var(--apple-green); }
+.badge-gray { background: rgba(0,0,0,0.05); color: var(--text-secondary); }
+@media (max-width: 1023px) {
+  .wiki-grid { grid-template-columns: repeat(2, 1fr); }
+  .wiki-params-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 599px) {
+  .wiki-grid { grid-template-columns: 1fr; }
+  .wiki-detail-grid { grid-template-columns: 1fr; }
+  .wiki-structure-image-single { min-height: 280px; }
+  .wiki-params-grid { grid-template-columns: 1fr; }
+  .wiki-structure-image { min-height: 240px; }
+}
 </style>
 </head>
 <body>
@@ -703,9 +1180,17 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helv
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         <span>专业问题</span>
       </div>
-      <div class="nav-item" data-nav="/materials">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-        <span>素材库</span>
+      <div class="nav-item" data-nav="/calculator">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+        <span>纸箱计算</span>
+      </div>
+      <div class="nav-item" data-nav="/simulation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span>模拟沟通</span>
+      </div>
+      <div class="nav-item" data-nav="/wiki">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span>纸箱Wiki</span>
       </div>
       <div class="nav-item" data-nav="/settings">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -765,9 +1250,17 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helv
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
       <span>问答</span>
     </div>
-    <div class="mobile-nav-item" data-nav="/materials">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-      <span>素材</span>
+    <div class="mobile-nav-item" data-nav="/calculator">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+      <span>计算</span>
+    </div>
+    <div class="mobile-nav-item" data-nav="/simulation">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>模拟</span>
+    </div>
+    <div class="mobile-nav-item" data-nav="/wiki">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      <span>Wiki</span>
     </div>
     <div class="mobile-nav-item" data-nav="/settings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -806,6 +1299,44 @@ const QUOTE_STATUSES = [
   { value: 'lost',     label: '已流失',  color: '#FF3B30', badge: 'badge-red' },
 ];
 const EQUIPMENT_TYPES = ['瓦楞纸板生产线','瓦楞纸箱生产线','高速柔印开槽模切机','自动打包机','全自动粘箱打包一体机','全自动粘钉打包一体机','其他设备'];
+
+/* ==================== 客户增强：国旗 + 客户类型 ==================== */
+// 国家→国旗emoji映射
+const COUNTRY_FLAGS = {
+  '泰国':'\u{1F1F9}\u{1F1ED}','印度尼西亚':'\u{1F1EE}\u{1F1E9}','印尼':'\u{1F1EE}\u{1F1E9}',
+  '越南':'\u{1F1FB}\u{1F1F3}','柬埔寨':'\u{1F1F0}\u{1F1ED}','老挝':'\u{1F1F1}\u{1F1E6}',
+  '新加坡':'\u{1F1F8}\u{1F1EC}','马来西亚':'\u{1F1F2}\u{1F1FE}','菲律宾':'\u{1F1F5}\u{1F1ED}',
+  '中国':'\u{1F1E8}\u{1F1F3}','香港':'\u{1F1ED}\u{1F1F0}','台湾':'\u{1F1F9}\u{1F1FC}',
+  '澳门':'\u{1F1F2}\u{1F1F4}','文莱':'\u{1F1E7}\u{1F1F3}','缅甸':'\u{1F1F2}\u{1F1F2}',
+  '日本':'\u{1F1EF}\u{1F1F5}','韩国':'\u{1F1F0}\u{1F1F7}','印度':'\u{1F1EE}\u{1F1F3}',
+  '美国':'\u{1F1FA}\u{1F1F8}','英国':'\u{1F1EC}\u{1F1E7}','德国':'\u{1F1E9}\u{1F1EA}',
+  '法国':'\u{1F1EB}\u{1F1F7}','意大利':'\u{1F1EE}\u{1F1F9}','西班牙':'\u{1F1EA}\u{1F1F8}',
+  '加拿大':'\u{1F1E8}\u{1F1E6}','澳大利亚':'\u{1F1E6}\u{1F1FA}','巴西':'\u{1F1E7}\u{1F1F7}',
+  '墨西哥':'\u{1F1F2}\u{1F1FD}','土耳其':'\u{1F1F9}\u{1F1F7}','阿联酋':'\u{1F1E6}\u{1F1EA}',
+  '沙特':'\u{1F1F8}\u{1F1E6}','沙特阿拉伯':'\u{1F1F8}\u{1F1E6}','南非':'\u{1F1FF}\u{1F1E6}',
+  '埃及':'\u{1F1EA}\u{1F1EC}','俄罗斯':'\u{1F1F7}\u{1F1FA}','波兰':'\u{1F1F5}\u{1F1F1}',
+  '荷兰':'\u{1F1F3}\u{1F1F1}','泰国 ':'\u{1F1F9}\u{1F1ED}','印度 ':'\u{1F1EE}\u{1F1F3}'
+};
+// 获取国家国旗emoji
+function getCountryFlag(country) {
+  if (!country) return '\u{1F30D}';
+  country = country.trim();
+  if (COUNTRY_FLAGS[country]) return COUNTRY_FLAGS[country];
+  for (const key of Object.keys(COUNTRY_FLAGS)) {
+    if (country.includes(key) || key.includes(country)) return COUNTRY_FLAGS[key];
+  }
+  return '\u{1F30D}';
+}
+// 获取客户类型（兼容旧数据）
+function getCustomerTypeLabel(customer) {
+  return customer.customerType === 'distributor' ? '经销商' : '终端客户';
+}
+function getCustomerTypeIcon(customer) {
+  return customer.customerType === 'distributor' ? '\u{1F3EA}' : '\u{1F3ED}';
+}
+function getCustomerTypeColor(customer) {
+  return customer.customerType === 'distributor' ? '#007AFF' : '#FF9500';
+}
 const AVATAR_COLORS = ['#FF6B6B','#FFA94D','#FFD43B','#69DB7C','#38D9A9','#4DABF7','#748FFC','#DA77F2'];
 const STORAGE_KEY = 'carton_crm_data';
 
@@ -815,7 +1346,7 @@ const STORAGE_KEY = 'carton_crm_data';
 const Storage = {
   _data: null,
   _defaults() {
-    return { customers: [], followups: [], quotations: [], socialMedia: {schedules:[], drafts:[], posts:[]}, scripts: [], competitors: [], faq: [], materials: [], todoDone: {}, config: {
+    return { customers: [], followups: [], quotations: [], socialMedia: {schedules:[], drafts:[], posts:[]}, scripts: [], competitors: [], faq: [], todoDone: {}, config: {
             whatsappTemplates: [
         { name: "Initial Greeting", content: "Hello [Name],\n\nThis is Sophie from Huayu Carton Machinery, a leading manufacturer of carton machinery in China.\n\nWe understand you are in the carton packaging industry. I would love to learn more about your production needs and see how we can support your business.\n\nLooking forward to connecting.\n\nBest regards,\nSophie\nHuayu Carton Machinery" },
         { name: "Price Follow-up", content: "Hi [Name],\n\nFollowing up on our previous discussion regarding [Equipment].\n\nWe have competitive pricing options for your market in [Country]. I would be happy to share a detailed quotation tailored to your requirements.\n\nPlease let me know your target budget or specific configuration needs.\n\nBest regards,\nSophie\nHuayu Carton Machinery" },
@@ -854,7 +1385,18 @@ const Storage = {
     return this._data;
   },
   save() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(this._data));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(this._data));
+    } catch(e) {
+      if (e.name === 'QuotaExceededError' || e.message && e.message.indexOf('quota') >= 0) {
+        Utils.toast('存储空间已满，请导出备份后清空数据');
+        console.error('localStorage quota exceeded:', e);
+      } else {
+        Utils.toast('保存失败：' + e.message);
+        console.error('Storage save error:', e);
+      }
+      throw e;
+    }
   },
   get() { return this._data || this.load(); },
   // 快捷访问
@@ -878,8 +1420,6 @@ const Storage = {
   setCompetitors(v) { this.get().competitors = v; this.save(); },
   getFaq() { return this.get().faq || []; },
   setFaq(v) { this.get().faq = v; this.save(); },
-  getMaterials() { return this.get().materials || []; },
-  setMaterials(v) { this.get().materials = v; this.save(); },
   getConfig() { return this.get().config || { lastQuoteNumber: { year: 2026, month: 5, sequence: 0 } }; },
   setConfig(v) { this.get().config = v; this.save(); },
   // 数据使用量 (估算)
@@ -1267,8 +1807,14 @@ const Router = {
       this.renderCompetitors(content, title, subtitle, actions);
     } else if (path === '/faq') {
       this.renderFaq(content, title, subtitle, actions);
-    } else if (path === '/materials') {
-      this.renderMaterials(content, title, subtitle, actions);
+    } else if (path === '/calculator') {
+      this.renderCalculator(content, title, subtitle, actions);
+    } else if (path === '/simulation') {
+      this.renderSimulation(content, title, subtitle, actions);
+    } else if (path === '/wiki' && params.id) {
+      Router.renderWikiDetail(params.id, content, title, subtitle, actions);
+    } else if (path === '/wiki') {
+      this.renderWiki(content, title, subtitle, actions);
     } else {
       this.navigate('/');
     }
@@ -1524,13 +2070,31 @@ Router.renderCustomers = function(content, title, subtitle, actions) {
   const customers = Storage.getCustomers();
   const filterPriority = sessionStorage.getItem('cust_filter_priority') || 'all';
   const filterStage = sessionStorage.getItem('cust_filter_stage') || 'all';
-  const filterTag = sessionStorage.getItem('cust_filter_tag') || 'all';
+  const filterFollowup = sessionStorage.getItem('cust_filter_followup') || 'all';
+  const filterCustomerType = sessionStorage.getItem('cust_filter_customerType') || 'all';
+  const filterCountry = sessionStorage.getItem('cust_filter_country') || 'all';
   const searchQuery = (sessionStorage.getItem('cust_search') || '').toLowerCase();
 
   let filtered = customers;
+  if (filterCustomerType !== 'all') filtered = filtered.filter(c => (c.customerType || 'end_user') === filterCustomerType);
+  if (filterCountry !== 'all') filtered = filtered.filter(c => c.country === filterCountry);
   if (filterPriority !== 'all') filtered = filtered.filter(c => c.priority === filterPriority);
   if (filterStage !== 'all') filtered = filtered.filter(c => c.stage === filterStage);
-  if (filterTag !== 'all') filtered = filtered.filter(c => c.tags && c.tags.includes(filterTag));
+  if (filterFollowup !== 'all') {
+    var today = new Date();
+    today.setHours(0,0,0,0);
+    filtered = filtered.filter(function(c) {
+      if (!c.nextFollowUp) return false;
+      var followDate = new Date(c.nextFollowUp);
+      followDate.setHours(0,0,0,0);
+      if (filterFollowup === 'pending') {
+        return followDate >= today;
+      } else if (filterFollowup === 'overdue') {
+        return followDate < today;
+      }
+      return true;
+    });
+  }
   if (searchQuery) {
     const q = searchQuery;
     filtered = filtered.filter(c =>
@@ -1545,7 +2109,18 @@ Router.renderCustomers = function(content, title, subtitle, actions) {
     );
   }
 
+  // 视图模式（默认卡片视图）
+  var viewMode = sessionStorage.getItem('cust_view_mode') || 'card';
+
   content.innerHTML = `
+    <!-- 顶部栏：数量 + 视图切换 -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div style="font-size:13px;color:var(--text-secondary);">共 ${filtered.length} 个客户</div>
+      <div style="display:flex;gap:4px;background:#f1f5f9;border-radius:8px;padding:2px;">
+        <button onclick="sessionStorage.setItem('cust_view_mode','card');Router.handleRoute();" style="font-size:12px;padding:4px 10px;border-radius:6px;border:none;cursor:pointer;background:${viewMode==='card'?'#fff':'transparent'};color:${viewMode==='card'?'#1e293b':'#94a3b8'};font-weight:${viewMode==='card'?'600':'400'};box-shadow:${viewMode==='card'?'0 1px 3px rgba(0,0,0,0.1)':'none'};">卡片</button>
+        <button onclick="sessionStorage.setItem('cust_view_mode','list');Router.handleRoute();" style="font-size:12px;padding:4px 10px;border-radius:6px;border:none;cursor:pointer;background:${viewMode==='list'?'#fff':'transparent'};color:${viewMode==='list'?'#1e293b':'#94a3b8'};font-weight:${viewMode==='list'?'600':'400'};box-shadow:${viewMode==='list'?'0 1px 3px rgba(0,0,0,0.1)':'none'};">📋 列表</button>
+      </div>
+    </div>
     <!-- 搜索和筛选 -->
     <div class="flex flex-col md:flex-row gap-3 mb-5">
       <div class="search-box flex-1">
@@ -1556,13 +2131,24 @@ Router.renderCustomers = function(content, title, subtitle, actions) {
         <option value="all" ${filterPriority==='all'?'selected':''}>全部优先级</option>
         ${PRIORITIES.map(p => `<option value="${p.value}" ${filterPriority===p.value?'selected':''}>${p.label}</option>`).join('')}
       </select>
+      <select class="filter-select" id="filter-customerType" onchange="sessionStorage.setItem('cust_filter_customerType',this.value);Router.handleRoute();">
+        <option value="all" ${filterCustomerType==='all'?'selected':''}>全部类型</option>
+        <option value="distributor" ${filterCustomerType==='distributor'?'selected':''}>🏪 经销商</option>
+        <option value="end_user" ${filterCustomerType==='end_user'?'selected':''}>🏭 终端客户</option>
+      </select>
+      <!-- 国家可搜索筛选 -->
+      <div style="position:relative;" id="country-filter-wrap">
+        <input type="text" class="filter-select" id="filter-country-input" placeholder="${filterCountry==='all'?'全部国家':filterCountry}" value="${filterCountry==='all'?'':filterCountry}" autocomplete="off" onfocus="showCountryFilter(event)" oninput="filterCountryList(this.value)">
+        <div id="country-filter-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:100;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,0.15);max-height:360px;overflow-y:auto;margin-top:6px;padding:8px 0;backdrop-filter:blur(12px);"></div>
+      </div>
       <select class="filter-select" id="filter-stage" onchange="sessionStorage.setItem('cust_filter_stage',this.value);Router.handleRoute();">
         <option value="all" ${filterStage==='all'?'selected':''}>全部阶段</option>
         ${STAGES.map(s => `<option value="${s}" ${filterStage===s?'selected':''}>${s}</option>`).join('')}
       </select>
-      <select class="filter-select" id="filter-tag" onchange="sessionStorage.setItem('cust_filter_tag',this.value);Router.handleRoute();">
-        <option value="all" ${filterTag==='all'?'selected':''}>全部标签</option>
-        ${Utils.getAllTags().map(t => `<option value="${t}" ${filterTag===t?'selected':''}>${t}</option>`).join('')}
+      <select class="filter-select" id="filter-followup" onchange="sessionStorage.setItem('cust_filter_followup',this.value);Router.handleRoute();">
+        <option value="all" ${filterFollowup==='all'?'selected':''}>跟进情况</option>
+        <option value="pending" ${filterFollowup==='pending'?'selected':''}>待跟进</option>
+        <option value="overdue" ${filterFollowup==='overdue'?'selected':''}>已过期</option>
       </select>
     </div>
 
@@ -1573,8 +2159,7 @@ Router.renderCustomers = function(content, title, subtitle, actions) {
         <p>${customers.length === 0 ? '点击右上角"新增客户"开始添加' : '尝试调整筛选条件'}</p>
       </div>
     ` : `
-      <div style="font-size:13px;color:var(--text-secondary);margin-bottom:12px;">共 ${filtered.length} 个客户</div>
-      <div class="customer-grid">
+      <div class="customer-grid" ${viewMode==='list'?'style=\"display:flex;flex-direction:column;gap:8px;\"':''}>
         ${filtered.map((c, i) => {
           const gradeColors = { 'A': '#10b981', 'B': '#f97316', 'C': '#3b82f6', 'D': '#86868B' };
           const gradeColor = gradeColors[c.priority] || gradeColors['D'];
@@ -1587,17 +2172,45 @@ Router.renderCustomers = function(content, title, subtitle, actions) {
           const hueClass = 'cust-card-hue-' + (i % 8);
           const localTimeInfo = Utils.getLocalTimeInfo(c.country);
           const dotClass = localTimeInfo.isWorkHours ? 'cust-card-localtime-dot working' : 'cust-card-localtime-dot';
-          return `<div class="cust-card ${hueClass}" onclick="Router.navigate('/customer?id=${c.id}')">
-            <div class="cust-card-header">
-              <div class="cust-card-grade" style="background:${gradeColor};">${c.priority || 'D'}</div>
-              <div class="cust-card-name">${displayName}</div>
+          var borderColor = c.customerType==='distributor'?'#007AFF':'#FF9500';
+          // 列表视图（紧凑行）
+          if (viewMode === 'list') {
+            return `<div class="cust-card" style="border-left:3px solid ${borderColor};flex-direction:row;align-items:center;gap:16px;padding:12px 20px;min-width:auto;max-width:none;cursor:pointer;" onclick="Router.navigate('/customer?id=${c.id}')">
+              <div class="cust-card-grade" style="background:${gradeColor};width:28px;height:28px;font-size:12px;">${c.priority || 'D'}</div>
+              <div style="flex:1;min-width:0;display:flex;align-items:center;gap:12px;flex-wrap:nowrap;overflow:hidden;">
+                <div style="min-width:0;"><div style="font-size:14px;font-weight:600;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${displayName}</div></div>
+                <span style="font-size:12px;color:#64748b;white-space:nowrap;flex-shrink:0;">${getCountryFlag(c.country)} ${c.country}</span>
+                <span style="font-size:11px;padding:1px 8px;border-radius:8px;background:${getCustomerTypeColor(c)}15;color:${getCustomerTypeColor(c)};font-weight:500;white-space:nowrap;flex-shrink:0;">${getCustomerTypeLabel(c)}</span>
+              </div>
+              <span class="cust-card-stage ${stageClass}" style="flex-shrink:0;">${c.stage || '潜在客户'}</span>
+              <span style="font-size:12px;color:#64748b;white-space:nowrap;flex-shrink:0;"><span class="${dotClass}" style="display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:4px;vertical-align:middle;${localTimeInfo.isWorkHours?'background:#10b981;':'background:#94a3b8;'}"></span>${localTimeInfo.time}</span>
+              <span class="${followUpClass}" style="flex-shrink:0;white-space:nowrap;">${followUpText}</span>
+              <div style="display:flex;gap:4px;flex-shrink:0;" onclick="event.stopPropagation();">
+                <button onclick="showFollowUpForm('${c.id}')" style="font-size:11px;padding:3px 8px;border-radius:5px;border:none;cursor:pointer;background:#f1f5f9;color:#475569;">💬</button>
+                <button onclick="showCustomerForm('${c.id}')" style="font-size:11px;padding:3px 8px;border-radius:5px;border:none;cursor:pointer;background:#f1f5f9;color:#475569;">✏️</button>
+              </div>
+            </div>`;
+          }
+          // 卡片视图（默认）
+          return `<div class="cust-card ${hueClass}" style="border-left:3px solid ${borderColor};" onclick="Router.navigate('/customer?id=${c.id}')">
+            <div class="cust-card-header" style="display:flex;align-items:center;justify-content:space-between;">
+              <div style="display:flex;align-items:center;gap:6px;min-width:0;flex:1;">
+                <div class="cust-card-grade" style="background:${gradeColor};">${c.priority || 'D'}</div>
+                <div class="cust-card-name">${displayName}</div>
+              </div>
+              <span style="flex-shrink:0;font-size:11px;padding:2px 8px;border-radius:10px;background:${getCustomerTypeColor(c)}15;color:${getCustomerTypeColor(c)};font-weight:500;">${getCustomerTypeIcon(c)} ${getCustomerTypeLabel(c)}</span>
             </div>
-            <div class="cust-card-country">${c.country}</div>
+            <div class="cust-card-country">${getCountryFlag(c.country)} ${c.country}</div>
             <div class="cust-card-product">${c.mainProduct || (c.tags && c.tags.length ? c.tags.join('、') : '-')}</div>
             <div class="cust-card-footer">
               <span class="cust-card-stage ${stageClass}">${c.stage || '潜在客户'}</span>
               <span class="cust-card-localtime"><span class="${dotClass}"></span>${localTimeInfo.time} <span style="color:${localTimeInfo.isWeekend?'#FF9F7F':'var(--text-secondary)'};font-size:12px;font-weight:500;margin-left:2px;">${localTimeInfo.weekday}</span></span>
               <span class="${followUpClass}">${followUpText}</span>
+            </div>
+            <div class="cust-card-actions" onclick="event.stopPropagation();">
+              <button onclick="showFollowUpForm('${c.id}')" title="添加跟进">💬 跟进</button>
+              <button onclick="showCustomerForm('${c.id}')" title="编辑客户">✏️ 编辑</button>
+              <button onclick="Router.navigate('/customer?id=${c.id}')" title="查看详情">📋 详情</button>
             </div>
           </div>`;
         }).join('')}
@@ -1605,6 +2218,71 @@ Router.renderCustomers = function(content, title, subtitle, actions) {
     `}
   `;
 };
+
+// ========== 国家可搜索筛选器 ==========
+// 按大洲分组的国家列表（用于筛选下拉）
+var COUNTRY_GROUPS = [
+  { name: '东南亚', countries: ['泰国','印度尼西亚','印尼','越南','马来西亚','菲律宾','柬埔寨','老挝','缅甸','新加坡','文莱'] },
+  { name: '东亚', countries: ['中国','日本','韩国','香港','台湾','澳门'] },
+  { name: '南亚', countries: ['印度'] },
+  { name: '中东非洲', countries: ['土耳其','阿联酋','沙特','沙特阿拉伯','埃及','南非'] },
+  { name: '东欧', countries: ['俄罗斯','波兰'] },
+  { name: '西欧', countries: ['德国','法国','意大利','西班牙','荷兰','英国'] },
+  { name: '美洲', countries: ['美国','加拿大','巴西','墨西哥','澳大利亚'] }
+];
+
+// 显示国家筛选下拉
+function showCountryFilter(e) {
+  e.stopPropagation();
+  var dd = document.getElementById('country-filter-dropdown');
+  if (dd.style.display === 'block') { dd.style.display = 'none'; return; }
+  renderCountryFilterList('');
+  dd.style.display = 'block';
+}
+// 过滤国家列表
+function filterCountryList(keyword) {
+  renderCountryFilterList(keyword);
+}
+// 渲染国家分组列表
+function renderCountryFilterList(keyword) {
+  var dd = document.getElementById('country-filter-dropdown');
+  var kw = (keyword || '').toLowerCase().trim();
+  var html = '<div style="padding:6px 14px;cursor:pointer;font-size:13px;color:var(--text-secondary);border-radius:8px;margin:4px 8px;font-weight:500;" onmouseover="this.style.background=\'#f0f4f8\'" onmouseout="this.style.background=\'\'" onclick="selectCountryFilter(\'all\');">🌍 全部国家</div>';
+  COUNTRY_GROUPS.forEach(function(group) {
+    var filtered = group.countries.filter(function(c) { return !kw || c.toLowerCase().indexOf(kw) !== -1; });
+    if (filtered.length === 0) return;
+    html += '<div style="padding:6px 14px 2px;font-size:11px;color:#8898aa;font-weight:600;letter-spacing:0.5px;margin-top:4px;">' + group.name + '</div>';
+    filtered.forEach(function(c) {
+      var flag = getCountryFlag(c);
+      html += '<div style="padding:7px 14px;cursor:pointer;font-size:13px;border-radius:8px;margin:1px 8px;display:flex;align-items:center;gap:10px;color:#333;" onmouseover="this.style.background=\'#f0f4f8\'" onmouseout="this.style.background=\'\'" onclick="selectCountryFilter(\'' + c.replace(/'/g, "\\'") + '\');">' + flag + ' <span style="font-weight:500;">' + c + '</span></div>';
+    });
+  });
+  if (kw && html.indexOf('onmouseover') === -1) {
+    html += '<div style="padding:16px 12px;text-align:center;font-size:13px;color:var(--text-tertiary);">未找到匹配国家</div>';
+  }
+  dd.innerHTML = html;
+}
+// 选择国家筛选
+function selectCountryFilter(country) {
+  var input = document.getElementById('filter-country-input');
+  var dd = document.getElementById('country-filter-dropdown');
+  if (country === 'all') {
+    sessionStorage.removeItem('cust_filter_country');
+    input.value = '';
+    input.placeholder = '全部国家';
+  } else {
+    sessionStorage.setItem('cust_filter_country', country);
+    input.value = getCountryFlag(country) + ' ' + country;
+  }
+  dd.style.display = 'none';
+  Router.handleRoute();
+}
+// 点击其他区域关闭国家下拉
+document.addEventListener('click', function(e) {
+  var wrap = document.getElementById('country-filter-wrap');
+  var dd = document.getElementById('country-filter-dropdown');
+  if (wrap && dd && !wrap.contains(e.target)) { dd.style.display = 'none'; }
+});
 
 // ========== 搜索栏逻辑 ==========
 // 输入过程中只记录，不触发搜索
@@ -1713,7 +2391,7 @@ Router.renderCustomerDetail = function(id, content, title, subtitle, actions) {
   const nextId = idx < customers.length - 1 ? customers[idx + 1].id : null;
 
   title.textContent = c.name;
-  subtitle.textContent = c.country + ' · ' + (c.mainProduct || '未设置主营产品');
+  subtitle.textContent = getCountryFlag(c.country) + ' ' + c.country + ' · ' + getCustomerTypeLabel(c) + (c.mainProduct ? ' · ' + c.mainProduct : '');
   actions.innerHTML = `
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
       <button class="btn btn-sm btn-ghost" onclick="Router.navigate('/customers')">← 返回</button>
@@ -1737,7 +2415,8 @@ Router.renderCustomerDetail = function(id, content, title, subtitle, actions) {
       <div class="card detail-section">
         <div class="detail-section-title">基本信息</div>
         <div class="info-grid">
-          <div class="info-item"><div class="info-label">国家</div><div class="info-value">${c.country || '-'}</div></div>
+          <div class="info-item"><div class="info-label">客户类型</div><div class="info-value"><span style="display:inline-block;padding:2px 10px;border-radius:8px;background:${getCustomerTypeColor(c)}15;color:${getCustomerTypeColor(c)};font-weight:600;">${getCustomerTypeIcon(c)} ${getCustomerTypeLabel(c)}</span></div></div>
+          <div class="info-item"><div class="info-label">国家</div><div class="info-value">${getCountryFlag(c.country)} ${c.country || '-'}</div></div>
           <div class="info-item"><div class="info-label">企业规模</div><div class="info-value">${c.companySize || '-'}</div></div>
           <div class="info-item"><div class="info-label">联系人</div><div class="info-value">${c.contactPerson || '-'}</div></div>
           <div class="info-item"><div class="info-label">邮箱</div><div class="info-value">${c.email || '-'}</div></div>
@@ -1971,8 +2650,7 @@ Router.renderSettings = function(content, title, subtitle, actions) {
     socialMedia: (data.socialMedia ? (data.socialMedia.schedules||[]).length + (data.socialMedia.drafts||[]).length + (data.socialMedia.posts||[]).length : 0),
     scripts: data.scripts.length,
     competitors: data.competitors.length,
-    faq: data.faq.length,
-    materials: data.materials.length
+    faq: data.faq.length
   };
 
   content.innerHTML = `
@@ -1988,7 +2666,6 @@ Router.renderSettings = function(content, title, subtitle, actions) {
           <div><div class="stat-label">话术</div><div style="font-size:24px;font-weight:600;">${stats.scripts}</div></div>
           <div><div class="stat-label">对手</div><div style="font-size:24px;font-weight:600;">${stats.competitors}</div></div>
           <div><div class="stat-label">问答</div><div style="font-size:24px;font-weight:600;">${stats.faq}</div></div>
-          <div><div class="stat-label">素材</div><div style="font-size:24px;font-weight:600;">${stats.materials}</div></div>
         </div>
         <div class="section-divider"></div>
         <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -2856,209 +3533,504 @@ function deleteFaq(id) {
   });
 }
 
-/* ===== 5.11 素材库 ===== */
-Router.renderMaterials = function(content, title, subtitle, actions) {
-  title.textContent = '素材库';
-  subtitle.textContent = '管理图片、水印等视频剪辑素材';
-  actions.innerHTML = '<button class="btn btn-sm btn-secondary" onclick="clearMaterialCache()" style="font-size:12px;">清理缓存</button>';
+/* ================================================================
+   ==================== 5.12 纸箱计算 =============================
+   ================================================================ */
+Router.renderCalculator = function(content, title, subtitle, actions) {
+  title.textContent = '纸箱计算';
+  subtitle.textContent = '纸箱尺寸与纸板尺寸互相换算';
+  actions.innerHTML = '';
 
-  const materials = Storage.getMaterials();
-  const filterTag = sessionStorage.getItem('materials_filter_tag') || 'all';
-  const CUSTOM_TAGS = ['图片', '水印', '视频脚本', '其他'];
-
-  let filtered = materials;
-  if (filterTag !== 'all') filtered = filtered.filter(m => m.tags && m.tags.includes(filterTag));
-
-  // 分离水印素材
-  const watermarks = filtered.filter(m => m.tags && m.tags.includes('水印'));
-  const others = filtered.filter(m => !(m.tags && m.tags.includes('水印')));
+  const tongue = parseInt(sessionStorage.getItem('calc_tongue') || '40');
+  const mode = sessionStorage.getItem('calc_mode') || 'c2b';
 
   content.innerHTML = `
-    <!-- 上传区 -->
     <div class="card" style="margin-bottom:16px;">
-      <div class="upload-zone" id="upload-zone" ondragover="event.preventDefault();this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" ondrop="handleDrop(event)" onclick="document.getElementById('file-input').click()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        <p>拖拽图片到此处或点击上传</p>
-        <p style="font-size:12px;color:#C7C7CC;margin-top:4px;">支持 JPG / PNG / WebP，单文件 ≤ 10MB</p>
-        <div class="upload-progress" id="upload-progress" style="display:none;"><div class="upload-progress-bar" id="upload-progress-bar"></div></div>
+      <div class="calc-mode-toggle">
+        <button class="calc-mode-btn ${mode==='c2b'?'active':''}" onclick="switchCalcMode('c2b',this)">纸箱 → 纸板</button>
+        <button class="calc-mode-btn ${mode==='b2c'?'active':''}" onclick="switchCalcMode('b2c',this)">纸板 → 纸箱</button>
       </div>
-      <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" multiple style="display:none" onchange="handleFileSelect(event)">
-    </div>
 
-    <!-- 分类标签 -->
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center;">
-      <div class="tag-custom ${filterTag === 'all' ? 'active' : ''}" onclick="sessionStorage.setItem('materials_filter_tag','all');Router.handleRoute();">全部</div>
-      ${CUSTOM_TAGS.map(t => `<div class="tag-custom ${filterTag === t ? 'active' : ''}" onclick="sessionStorage.setItem('materials_filter_tag','${t}');Router.handleRoute();">${t}</div>`).join('')}
-      <span style="font-size:13px;color:var(--text-secondary);margin-left:auto;">共 ${filtered.length} 个素材</span>
-    </div>
-
-    <!-- 水印管理 -->
-    ${watermarks.length > 0 ? `
-    <div class="card" style="margin-bottom:16px;">
-      <div class="detail-section-title">水印管理</div>
-      <div class="watermark-area">
-        ${watermarks.map(w => `
-          <div>
-            <div style="font-size:13px;font-weight:500;margin-bottom:8px;">${w.name}</div>
-            <div class="watermark-preview"><img src="${w.base64}" alt="${w.name}" onclick="previewMaterial('${w.id}')" style="cursor:pointer;"></div>
-            <div style="display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap;">
-              <label style="font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:4px;">
-                透明度: <input type="range" min="0" max="100" value="80" oninput="adjustWatermarkOpacity(this,'${w.id}')">
-              </label>
-              <button class="btn btn-sm btn-ghost" onclick="setDefaultWatermark('${w.id}')">设为默认</button>
-              <button class="btn btn-sm btn-ghost" onclick="deleteMaterial('${w.id}')" style="color:var(--apple-red);">删除</button>
+      <div id="calc-inputs">
+        ${mode === 'c2b' ? `
+          <div style="font-size:14px;font-weight:600;margin-bottom:12px;color:var(--text-secondary);">输入纸箱尺寸</div>
+          <div class="calc-form">
+            <div class="calc-form-group">
+              <label class="calc-form-label">纸箱长 (mm)</label>
+              <input class="calc-form-input" type="number" id="calc-carton-l" placeholder="例如 430" value="${sessionStorage.getItem('calc_carton_l')||''}">
+            </div>
+            <div class="calc-form-group">
+              <label class="calc-form-label">纸箱宽 (mm)</label>
+              <input class="calc-form-input" type="number" id="calc-carton-w" placeholder="例如 210" value="${sessionStorage.getItem('calc_carton_w')||''}">
+            </div>
+            <div class="calc-form-group">
+              <label class="calc-form-label">纸箱高 (mm)</label>
+              <input class="calc-form-input" type="number" id="calc-carton-h" placeholder="例如 270" value="${sessionStorage.getItem('calc_carton_h')||''}">
             </div>
           </div>
-        `).join('')}
+          <div class="calc-formula" style="margin-top:16px;">
+            <div style="font-size:13px;font-weight:500;color:var(--text-secondary);margin-bottom:6px;">计算公式</div>
+            <div>纸板长 = (纸箱长 + 纸箱宽) × 2 + 舌片</div>
+            <div>纸板宽 = 纸箱高 + 纸箱宽</div>
+          </div>
+        ` : `
+          <div style="font-size:14px;font-weight:600;margin-bottom:12px;color:var(--text-secondary);">输入纸板尺寸</div>
+          <div class="calc-form">
+            <div class="calc-form-group">
+              <label class="calc-form-label">纸板长 (mm)</label>
+              <input class="calc-form-input" type="number" id="calc-board-l" placeholder="例如 1330" value="${sessionStorage.getItem('calc_board_l')||''}">
+            </div>
+            <div class="calc-form-group">
+              <label class="calc-form-label">纸板宽 (mm)</label>
+              <input class="calc-form-input" type="number" id="calc-board-w" placeholder="例如 480" value="${sessionStorage.getItem('calc_board_w')||''}">
+            </div>
+          </div>
+          <div style="margin-top:16px;">
+            <div style="font-size:13px;font-weight:500;color:var(--text-secondary);margin-bottom:8px;">已知纸箱尺寸（任选其一输入，用于反推其余两项）</div>
+            <div class="calc-form">
+              <div class="calc-form-group">
+                <label class="calc-form-label">已知纸箱长 (mm)</label>
+                <input class="calc-form-input" type="number" id="calc-known-l" placeholder="可选，输入后自动计算宽和高">
+              </div>
+              <div class="calc-form-group">
+                <label class="calc-form-label">已知纸箱宽 (mm)</label>
+                <input class="calc-form-input" type="number" id="calc-known-w" placeholder="可选，输入后自动计算长和高">
+              </div>
+              <div class="calc-form-group">
+                <label class="calc-form-label">已知纸箱高 (mm)</label>
+                <input class="calc-form-input" type="number" id="calc-known-h" placeholder="可选，输入后自动计算长和宽">
+              </div>
+            </div>
+          </div>
+          <div class="calc-formula" style="margin-top:16px;">
+            <div style="font-size:13px;font-weight:500;color:var(--text-secondary);margin-bottom:6px;">反推公式</div>
+            <div>纸箱宽 = 纸板宽 − 纸箱高</div>
+            <div>纸箱长 = 纸板长 − 舌片 − 纸箱宽 × 2</div>
+          </div>
+        `}
       </div>
-    </div>` : ''}
 
-    <!-- 素材网格 -->
-    <div class="material-grid">
-      ${others.length === 0 ? '<div class="empty-state" style="grid-column:1/-1;padding:40px 20px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><h3>暂无素材</h3><p>上传图片素材开始使用</p></div>'
-        : others.map(m => `
-      <div class="material-item">
-        <img src="${m.base64}" alt="${m.name}" onclick="previewMaterial('${m.id}')">
-        <div class="mat-overlay"><div class="mat-name">${m.name}</div></div>
-        <div class="mat-actions">
-          <button class="mat-action-btn" onclick="event.stopPropagation();previewMaterial('${m.id}')" title="预览">👁</button>
-          <button class="mat-action-btn" onclick="event.stopPropagation();renameMaterial('${m.id}')" title="重命名">✏</button>
-          <button class="mat-action-btn" onclick="event.stopPropagation();copyMaterialLink('${m.id}')" title="复制链接">🔗</button>
-          <button class="mat-action-btn" onclick="event.stopPropagation();deleteMaterial('${m.id}')" title="删除" style="background:rgba(255,59,48,0.7);">✕</button>
-        </div>
-      </div>`).join('')}
+      <div class="calc-tongue">
+        <label>舌片尺寸（mm）</label>
+        <input type="range" min="30" max="50" value="${tongue}" oninput="updateCalcTongue(this)">
+        <span class="calc-tongue-value" id="calc-tongue-val">${tongue} mm</span>
+      </div>
+
+      <button class="btn btn-primary btn-lg" onclick="doCalc()" style="margin-top:20px;width:100%;">计算</button>
     </div>
+
+    <div id="calc-result"></div>
   `;
 };
 
-// 素材上传
-function handleFileSelect(event) {
-  const files = event.target.files;
-  uploadFiles(files);
-  event.target.value = '';
+function switchCalcMode(mode, btn) {
+  sessionStorage.setItem('calc_mode', mode);
+  Router.handleRoute();
 }
 
-function handleDrop(event) {
-  event.preventDefault();
-  document.getElementById('upload-zone').classList.remove('dragover');
-  const files = event.dataTransfer.files;
-  uploadFiles(files);
+function updateCalcTongue(slider) {
+  const v = slider.value;
+  sessionStorage.setItem('calc_tongue', v);
+  document.getElementById('calc-tongue-val').textContent = v + ' mm';
 }
 
-function uploadFiles(files) {
-  const MAX_SIZE = 10 * 1024 * 1024; // 10MB
-  const progressBar = document.getElementById('upload-progress');
-  const progressFill = document.getElementById('upload-progress-bar');
-  progressBar.style.display = 'block';
+function doCalc() {
+  const mode = sessionStorage.getItem('calc_mode') || 'c2b';
+  const tongue = parseInt(sessionStorage.getItem('calc_tongue') || '40');
+  const resultDiv = document.getElementById('calc-result');
 
-  let completed = 0;
-  const total = files.length;
+  if (mode === 'c2b') {
+    // 纸箱 → 纸板
+    const L = parseFloat(document.getElementById('calc-carton-l').value);
+    const W = parseFloat(document.getElementById('calc-carton-w').value);
+    const H = parseFloat(document.getElementById('calc-carton-h').value);
+    if (!L || !W || !H) { Utils.toast('请填写完整的纸箱尺寸'); return; }
+    // 保存输入
+    sessionStorage.setItem('calc_carton_l', L);
+    sessionStorage.setItem('calc_carton_w', W);
+    sessionStorage.setItem('calc_carton_h', H);
+    const boardL = (L + W) * 2 + tongue;
+    const boardW = H + W;
+    resultDiv.innerHTML = `
+      <div class="calc-result">
+        <div class="calc-result-title">计算结果</div>
+        <div class="calc-result-grid">
+          <div class="calc-result-item">
+            <div class="calc-result-label">纸板长</div>
+            <div class="calc-result-value">${boardL}<span class="calc-result-unit">mm</span></div>
+          </div>
+          <div class="calc-result-item">
+            <div class="calc-result-label">纸板宽</div>
+            <div class="calc-result-value">${boardW}<span class="calc-result-unit">mm</span></div>
+          </div>
+        </div>
+        <div style="margin-top:12px;font-size:12px;color:var(--text-secondary);">
+          计算依据：纸板长 = (${L} + ${W}) × 2 + ${tongue} = ${boardL}mm；纸板宽 = ${H} + ${W} = ${boardW}mm
+        </div>
+      </div>
+      ${renderCartonPreview(L, W, H, 'front')}
+    `;
+    lastCalcL = L; lastCalcW = W; lastCalcH = H;
+  } else {
+    // 纸板 → 纸箱（反推）
+    const boardL = parseFloat(document.getElementById('calc-board-l').value);
+    const boardW = parseFloat(document.getElementById('calc-board-w').value);
+    if (!boardL || !boardW) { Utils.toast('请填写完整的纸板尺寸'); return; }
+    sessionStorage.setItem('calc_board_l', boardL);
+    sessionStorage.setItem('calc_board_w', boardW);
 
-  for (const file of files) {
-    if (file.size > MAX_SIZE) {
-      Utils.toast(file.name + ' 超过10MB限制，已跳过');
-      completed++;
-      progressFill.style.width = (completed / total * 100) + '%';
-      if (completed === total) { setTimeout(() => { progressBar.style.display = 'none'; }, 500); Router.handleRoute(); }
-      continue;
+    const knownL = parseFloat(document.getElementById('calc-known-l').value) || 0;
+    const knownW = parseFloat(document.getElementById('calc-known-w').value) || 0;
+    const knownH = parseFloat(document.getElementById('calc-known-h').value) || 0;
+
+    let results = [];
+    if (knownW > 0) {
+      // 已知宽 → 求长、高
+      const L = (boardL - tongue) / 2 - knownW;
+      const H = boardW - knownW;
+      results = [
+        { label: '纸箱长', val: L.toFixed(1) },
+        { label: '纸箱宽', val: knownW },
+        { label: '纸箱高', val: H.toFixed(1) }
+      ];
+    } else if (knownL > 0) {
+      // 已知长 → 求宽、高（需要解方程：L + W = (boardL-tongue)/2，H = boardW - W）
+      // W = (boardL - tongue)/2 - L
+      const W = (boardL - tongue) / 2 - knownL;
+      const H = boardW - W;
+      results = [
+        { label: '纸箱长', val: knownL },
+        { label: '纸箱宽', val: W.toFixed(1) },
+        { label: '纸箱高', val: H.toFixed(1) }
+      ];
+    } else if (knownH > 0) {
+      // 已知高 → 求长、宽（H = boardW - W → W = boardW - H，然后 L = (boardL-tongue)/2 - W）
+      const W = boardW - knownH;
+      const L = (boardL - tongue) / 2 - W;
+      results = [
+        { label: '纸箱长', val: L.toFixed(1) },
+        { label: '纸箱宽', val: W.toFixed(1) },
+        { label: '纸箱高', val: knownH }
+      ];
+    } else {
+      // 未输入任何已知尺寸 → 提供最大体积计算选项
+      resultDiv.innerHTML = `
+        <div class="calc-result" style="border-color:rgba(255,149,0,0.3);background:rgba(255,149,0,0.05);">
+          <div class="calc-result-title" style="color:var(--apple-orange);">需要更多信息</div>
+          <div style="font-size:13px;color:var(--text-secondary);line-height:1.8;margin-bottom:16px;">
+            纸板尺寸反推纸箱尺寸时，通常需要已知<strong>至少一个</strong>纸箱尺寸（长/宽/高其一即可）。<br>
+            或者，您也可以计算该纸板能做出的<strong>最大体积</strong>纸箱：
+          </div>
+          <button class="btn btn-primary" onclick="calcMaxVolume()" style="width:100%;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            计算最大体积方案
+          </button>
+        </div>
+      `;
+      return;
     }
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-      Utils.toast(file.name + ' 格式不支持，已跳过');
-      completed++;
-      progressFill.style.width = (completed / total * 100) + '%';
-      if (completed === total) { setTimeout(() => { progressBar.style.display = 'none'; }, 500); Router.handleRoute(); }
-      continue;
-    }
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const materials = Storage.getMaterials();
-      materials.push({
-        id: Utils.id(),
-        name: file.name.replace(/\.[^.]+$/, ''),
-        type: file.type,
-        base64: e.target.result,
-        tags: ['图片'],
-        fileSize: file.size,
-        createdAt: new Date().toISOString()
-      });
-      Storage.setMaterials(materials);
-      completed++;
-      progressFill.style.width = (completed / total * 100) + '%';
-      if (completed === total) {
-        setTimeout(() => { progressBar.style.display = 'none'; }, 500);
-        Utils.toast('已上传 ' + completed + ' 个文件');
-        Router.handleRoute();
-      }
-    };
-    reader.readAsDataURL(file);
+
+    const rL = parseFloat(results.find(r=>r.label==='纸箱长').val);
+    const rW = parseFloat(results.find(r=>r.label==='纸箱宽').val);
+    const rH = parseFloat(results.find(r=>r.label==='纸箱高').val);
+    resultDiv.innerHTML = `
+      <div class="calc-result">
+        <div class="calc-result-title">计算结果（反推）</div>
+        <div class="calc-result-grid">
+          ${results.map(r => `
+            <div class="calc-result-item">
+              <div class="calc-result-label">${r.label}</div>
+              <div class="calc-result-value">${r.val}<span class="calc-result-unit">mm</span></div>
+            </div>
+          `).join('')}
+        </div>
+        <div style="margin-top:12px;font-size:12px;color:var(--text-secondary);">
+          舌片=${tongue}mm | 纸板长=${boardL}mm | 纸板宽=${boardW}mm
+        </div>
+      </div>
+      ${renderCartonPreview(rL, rW, rH, 'front')}
+    `;
+    lastCalcL = rL; lastCalcW = rW; lastCalcH = rH;
   }
 }
 
-// 素材操作
-function previewMaterial(id) {
-  const m = Storage.getMaterials().find(x => x.id === id);
-  if (!m) return;
-  openModal(`
-    <div class="modal-header"><div class="modal-title">${m.name}</div><button class="modal-close" onclick="closeModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-    <div style="text-align:center;">
-      <img src="${m.base64}" style="max-width:100%;max-height:70vh;border-radius:12px;object-fit:contain;" alt="${m.name}">
-    </div>
-    <div style="display:flex;gap:8px;justify-content:center;margin-top:16px;">
-      <button class="btn btn-sm btn-secondary" onclick="copyMaterialLink('${m.id}')">复制链接</button>
-      <button class="btn btn-sm btn-danger" onclick="closeModal();deleteMaterial('${m.id}')">删除</button>
-    </div>
-  `);
-}
+function calcMaxVolume() {
+  const boardL = parseFloat(document.getElementById('calc-board-l').value);
+  const boardW = parseFloat(document.getElementById('calc-board-w').value);
+  const tongue = parseInt(sessionStorage.getItem('calc_tongue') || '40');
+  const resultDiv = document.getElementById('calc-result');
 
-function renameMaterial(id) {
-  const materials = Storage.getMaterials();
-  const m = materials.find(x => x.id === id);
-  if (!m) return;
-  const newName = prompt('输入新名称：', m.name);
-  if (newName && newName.trim()) {
-    m.name = newName.trim();
-    Storage.setMaterials(materials);
-    Utils.toast('已重命名');
-    Router.handleRoute();
+  if (!boardL || !boardW) { Utils.toast('请填写完整的纸板尺寸'); return; }
+
+  // 数学推导：
+  // 纸板长 = (L + W) × 2 + tongue  →  L + W = (boardL - tongue) / 2 = A
+  // 纸板宽 = H + W  →  H = boardW - W = B - W（设 B = boardW）
+  // 体积 V = L × W × H = (A - W) × W × (B - W)
+  // 对W求导并令其为0：3W² - 2(A+B)W + AB = 0
+  // 解得：W = [(A+B) - √(A² - AB + B²)] / 3
+
+  const A = (boardL - tongue) / 2;  // L + W
+  const B = boardW;                  // W + H
+
+  const discriminant = Math.sqrt(A * A - A * B + B * B);
+  const W = ((A + B) - discriminant) / 3;
+  const L = A - W;
+  const H = B - W;
+  const volume = L * W * H;
+
+  // 验证约束
+  if (W <= 0 || L <= 0 || H <= 0) {
+    resultDiv.innerHTML = `
+      <div class="calc-result" style="border-color:rgba(255,59,48,0.3);background:rgba(255,59,48,0.05);">
+        <div class="calc-result-title" style="color:var(--apple-red);">无法计算</div>
+        <div style="font-size:13px;color:var(--text-secondary);line-height:1.8;">
+          当前纸板尺寸无法构成有效的纸箱，请检查纸板尺寸和舌片设置。
+        </div>
+      </div>
+    `;
+    return;
   }
+
+  resultDiv.innerHTML = `
+    <div class="calc-result" style="border-color:rgba(52,199,89,0.3);background:linear-gradient(135deg, rgba(52,199,89,0.05) 0%, rgba(0,122,255,0.05) 100%);">
+      <div class="calc-result-title" style="color:var(--apple-green);">最大体积方案</div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">在纸板 ${boardL}×${boardW}mm 的约束下，体积最大的纸箱尺寸</div>
+      <div class="calc-result-grid" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:12px;">
+        <div class="calc-result-item">
+          <div class="calc-result-label">纸箱长</div>
+          <div class="calc-result-value">${L.toFixed(1)}<span class="calc-result-unit">mm</span></div>
+        </div>
+        <div class="calc-result-item">
+          <div class="calc-result-label">纸箱宽</div>
+          <div class="calc-result-value">${W.toFixed(1)}<span class="calc-result-unit">mm</span></div>
+        </div>
+        <div class="calc-result-item">
+          <div class="calc-result-label">纸箱高</div>
+          <div class="calc-result-value">${H.toFixed(1)}<span class="calc-result-unit">mm</span></div>
+        </div>
+      </div>
+      <div class="calc-result-item" style="text-align:center;background:rgba(52,199,89,0.08);">
+        <div class="calc-result-label" style="color:var(--apple-green);">最大体积</div>
+        <div class="calc-result-value" style="color:var(--apple-green);font-size:28px;">${(volume / 1000000).toFixed(3)}<span class="calc-result-unit">m³</span></div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;">= ${Math.round(volume).toLocaleString()} mm³</div>
+      </div>
+      <div style="margin-top:12px;font-size:12px;color:var(--text-secondary);line-height:1.8;">
+        数学原理：令 V = L×W×H，在约束 L+W=${A.toFixed(1)}、W+H=${B.toFixed(1)} 下求极值<br>
+        求导得最优解：W = [(${A.toFixed(1)}+${B.toFixed(1)}) − √(${A.toFixed(1)}² − ${A.toFixed(1)}×${B.toFixed(1)} + ${B.toFixed(1)}²)] / 3 = ${W.toFixed(1)}mm
+      </div>
+    </div>
+    ${renderCartonPreview(L, W, H)}
+  `;
+  setTimeout(function() {
+    var svg = resultDiv.querySelector('.carton-preview svg');
+    if (svg && typeof initCarton3D === 'function') initCarton3D(svg.id, L, W, H);
+  }, 100);
 }
 
-function copyMaterialLink(id) {
-  const m = Storage.getMaterials().find(x => x.id === id);
-  if (!m || !m.base64) return;
-  navigator.clipboard.writeText(m.base64).then(() => {
-    Utils.toast('Base64链接已复制到剪贴板');
-  }).catch(() => {
-    Utils.toast('复制失败');
-  });
+/* 纸箱视图切换 */
+let lastCalcL = 0, lastCalcW = 0, lastCalcH = 0;
+function reRenderCartonView(view) {
+  const resultDiv = document.getElementById('calc-result');
+  if (!resultDiv) return;
+  // 找到现有的 carton-preview div
+  const previewDiv = resultDiv.querySelector('.carton-preview');
+  if (!previewDiv) return;
+  // 重新生成 SVG
+  const svgHtml = renderCartonPreview(lastCalcL, lastCalcW, lastCalcH, view);
+  // 替换整个 preview div 的 innerHTML
+  previewDiv.outerHTML = svgHtml;
 }
 
-function deleteMaterial(id) {
-  Utils.confirm('删除素材', '确定要删除此素材吗？此操作不可撤销。').then(ok => {
-    if (!ok) return;
-    Storage.setMaterials(Storage.getMaterials().filter(x => x.id !== id));
-    Utils.toast('素材已删除');
-    Router.handleRoute();
-  });
-}
+/* ================================================================
+   纸箱3D SVG 渲染器（打开盖子的RSC纸箱 + 简化透视）
+   支持 view 参数：front(主视图) / left(左视图) / top(俯视图) / right(侧视图)
+   ================================================================ */
+function renderCartonPreview(L, W, H, view) {
+  view = view || 'front';
+  if (!L || !W || !H || L <= 0 || W <= 0 || H <= 0) return '';
 
-function setDefaultWatermark(id) {
-  localStorage.setItem('crm_default_watermark', id);
-  Utils.toast('已设为默认水印');
-}
+  const maxDim = Math.max(L, W, H);
+  const scale = 200 / maxDim;
+  const sL = L * scale, sW = W * scale, sH = H * scale;
 
-function adjustWatermarkOpacity(slider, id) {
-  const preview = slider.closest('div').parentElement.querySelector('.watermark-preview img');
-  if (preview) preview.style.opacity = slider.value / 100;
-}
+  // 视图按钮
+  const btns = [{k:'front',l:'主视图'},{k:'left',l:'左视图'},{k:'top',l:'俯视图'},{k:'right',l:'侧视图'}];
+  let btnHtml = '<div class="carton-view-btns">';
+  btns.forEach(b => { btnHtml += '<button class="carton-view-btn'+(b.k===view?' active':'')+'" onclick="reRenderCartonView(\''+b.k+'\')">'+b.l+'</button>'; });
+  btnHtml += '</div>';
 
-function clearMaterialCache() {
-  Utils.confirm('清理缓存', '清理后将移除所有素材的本地缓存，释放存储空间。确认继续？').then(ok => {
-    if (!ok) return;
-    Storage.setMaterials([]);
-    Utils.toast('缓存已清理');
-    Router.handleRoute();
-  });
+  const CX = 220, CY = 210, uid = Math.random().toString(36).slice(2,8);
+  const viewNames = {front:'主视图',left:'左视图',top:'俯视图',right:'侧视图'};
+  const cF='#C4956A', cFD='#A87B4F', cS='#A87B4F', cSD='#8B6238';
+  const cB='#6B4A2A', cBD='#5C3D1E', cBot='#5C3D1E', cBotD='#4A3018';
+  const cFlap='#8B6238', cFlapD='#7A5430', cEdge='#4A3018';
+  const poly = pts => pts.map((p,i)=>(i===0?'M':'L')+p.x.toFixed(1)+','+p.y.toFixed(1)).join(' ')+' Z';
+
+  let svgBody = '', labelSvg = '';
+
+  if (view === 'front' || view === 'left' || view === 'right') {
+    // 通用3D视图：主面 + 深度面 + 翻盖
+    const isRight = view === 'right';
+    const isLeft = view === 'left';
+    const mainW = isLeft || isRight ? sW : sL;  // 主面宽度
+    const mainH = sH;                             // 主面高度
+    const depth = isLeft || isRight ? sL : sW;    // 深度尺寸
+    const dx = isRight ? -depth * 0.45 : depth * 0.45;
+    const dy = -depth * 0.32;
+
+    // 主面4点
+    const fBL = {x: CX - mainW/2, y: CY};
+    const fBR = {x: CX + mainW/2, y: CY};
+    const fTR = {x: CX + mainW/2, y: CY - mainH};
+    const fTL = {x: CX - mainW/2, y: CY - mainH};
+    // 深度面4点
+    const bBL = {x: fBL.x + dx, y: fBL.y + dy};
+    const bBR = {x: fBR.x + dx, y: fBR.y + dy};
+    const bTR = {x: fTR.x + dx, y: fTR.y + dy};
+    const bTL = {x: fTL.x + dx, y: fTL.y + dy};
+
+    // 翻盖
+    const flapLen = depth * 0.45;
+    const ffL = {x: fTL.x - 2, y: fTL.y - flapLen * 0.9};
+    const ffR = {x: fTR.x + 2, y: fTR.y - flapLen * 0.9};
+    const fbL = {x: bTL.x - 2, y: bTL.y - flapLen * 0.85};
+    const fbR = {x: bTR.x + 2, y: bTR.y - flapLen * 0.85};
+    const frL = {x: fTR.x + mainW * 0.35, y: fTR.y - mainW * 0.12};
+    const frR = {x: bTR.x + mainW * 0.30, y: bTR.y - mainW * 0.10};
+
+    // 阴影
+    const sx = (fBL.x + bBR.x) / 2;
+    const sy = Math.max(fBL.y, fBR.y, bBL.y, bBR.y) + 16;
+
+    svgBody = `
+      <ellipse cx="${sx.toFixed(1)}" cy="${sy.toFixed(1)}" rx="${(mainW*0.7).toFixed(1)}" ry="${(Math.max(mainW,depth)*0.18).toFixed(1)}" fill="rgba(0,0,0,0.10)"/>
+      <path d="${poly([fBL,fBR,bBR,bBL])}" fill="url(#gBot${uid})" stroke="${cEdge}" stroke-width="0.8" stroke-linejoin="round"/>
+      <path d="${poly([fBL,fBR,bBR,bBL])}" fill="url(#cor${uid})" opacity="0.30" pointer-events="none"/>
+      <path d="${poly([bBL,bBR,bTR,bTL])}" fill="url(#gB${uid})" stroke="${cEdge}" stroke-width="0.8" stroke-linejoin="round"/>
+      <path d="${poly([bBL,bBR,bTR,bTL])}" fill="url(#cor${uid})" opacity="0.25" pointer-events="none"/>
+      <path d="${poly([bTL,bTR,fbR,fbL])}" fill="url(#gFlap${uid})" stroke="${cEdge}" stroke-width="0.8" stroke-linejoin="round"/>
+      <line x1="${bTL.x.toFixed(1)}" y1="${bTL.y.toFixed(1)}" x2="${bTR.x.toFixed(1)}" y2="${bTR.y.toFixed(1)}" stroke="rgba(74,48,24,0.35)" stroke-width="0.8" stroke-dasharray="3,2"/>
+      <path d="${poly([fBR,bBR,bTR,fTR])}" fill="url(#gS${uid})" stroke="${cEdge}" stroke-width="1" stroke-linejoin="round"/>
+      <path d="${poly([fTR,bTR,frR,frL])}" fill="url(#gFlap${uid})" stroke="${cEdge}" stroke-width="0.8" stroke-linejoin="round"/>
+      <line x1="${fTR.x.toFixed(1)}" y1="${fTR.y.toFixed(1)}" x2="${bTR.x.toFixed(1)}" y2="${bTR.y.toFixed(1)}" stroke="rgba(74,48,24,0.35)" stroke-width="0.8" stroke-dasharray="3,2"/>
+      <path d="${poly([fTL,fTR,ffR,ffL])}" fill="url(#gFlap${uid})" stroke="${cEdge}" stroke-width="0.8" stroke-linejoin="round"/>
+      <line x1="${fTL.x.toFixed(1)}" y1="${fTL.y.toFixed(1)}" x2="${fTR.x.toFixed(1)}" y2="${fTR.y.toFixed(1)}" stroke="rgba(74,48,24,0.40)" stroke-width="0.8" stroke-dasharray="3,2"/>
+      <path d="${poly([fBL,fBR,fTR,fTL])}" fill="url(#gFront${uid})" stroke="${cEdge}" stroke-width="1" stroke-linejoin="round"/>
+      <path d="${poly([fBL,fBR,fTR,fTL])}" fill="url(#cor${uid})" opacity="0.35" pointer-events="none"/>
+      <path d="M${fBL.x.toFixed(1)},${fBL.y.toFixed(1)} L${(fBL.x+2).toFixed(1)},${fBL.y.toFixed(1)} L${(fTL.x+2).toFixed(1)},${fTL.y.toFixed(1)} L${fTL.x.toFixed(1)},${fTL.y.toFixed(1)} Z" fill="rgba(255,255,255,0.08)" pointer-events="none"/>
+      <line x1="${fTL.x.toFixed(1)}" y1="${fTL.y.toFixed(1)}" x2="${fTR.x.toFixed(1)}" y2="${fTR.y.toFixed(1)}" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+      <rect x="${((fBL.x+fBR.x)/2 - 5).toFixed(1)}" y="${Math.min(fTL.y,fBL.y).toFixed(1)}" width="10" height="${Math.abs(fBL.y-fTL.y).toFixed(1)}" fill="rgba(255,255,255,0.10)" pointer-events="none"/>
+      <line x1="${((fBL.x+fBR.x)/2).toFixed(1)}" y1="${fTL.y.toFixed(1)}" x2="${((fBL.x+fBR.x)/2).toFixed(1)}" y2="${fBL.y.toFixed(1)}" stroke="rgba(255,255,255,0.16)" stroke-width="1.2" pointer-events="none"/>
+    `;
+
+    // 标注
+    const lp = 24;
+    if (view === 'front') {
+      // 长=底边  高=右侧  宽=斜向
+      labelSvg += `<line x1="${fBL.x.toFixed(1)}" y1="${(fBL.y+lp).toFixed(1)}" x2="${fBR.x.toFixed(1)}" y2="${(fBR.y+lp).toFixed(1)}" class="carton-dim-line"/>`;
+      labelSvg += `<line x1="${fBL.x.toFixed(1)}" y1="${(fBL.y+4).toFixed(1)}" x2="${fBL.x.toFixed(1)}" y2="${(fBL.y+lp+2).toFixed(1)}" class="carton-dim-line"/>`;
+      labelSvg += `<line x1="${fBR.x.toFixed(1)}" y1="${(fBR.y+4).toFixed(1)}" x2="${fBR.x.toFixed(1)}" y2="${(fBR.y+lp+2).toFixed(1)}" class="carton-dim-line"/>`;
+      labelSvg += `<text x="${((fBL.x+fBR.x)/2).toFixed(1)}" y="${(fBL.y+lp+14).toFixed(1)}" text-anchor="middle" class="carton-dim-label">长 ${Math.round(L)}mm</text>`;
+      labelSvg += `<line x1="${(fBR.x+lp).toFixed(1)}" y1="${fBR.y.toFixed(1)}" x2="${(fTR.x+lp).toFixed(1)}" y2="${fTR.y.toFixed(1)}" class="carton-dim-line"/>`;
+      labelSvg += `<line x1="${(fBR.x+4).toFixed(1)}" y1="${fBR.y.toFixed(1)}" x2="${(fBR.x+lp+2).toFixed(1)}" y2="${fBR.y.toFixed(1)}" class="carton-dim-line"/>`;
+      labelSvg += `<line x1="${(fTR.x+4).toFixed(1)}" y1="${fTR.y.toFixed(1)}" x2="${(fTR.x+lp+2).toFixed(1)}" y2="${fTR.y.toFixed(1)}" class="carton-dim-line"/>`;
+      labelSvg += `<text x="${(fBR.x+lp+6).toFixed(1)}" y="${((fBR.y+fTR.y)/2+4).toFixed(1)}" text-anchor="start" class="carton-dim-label">高 ${Math.round(H)}mm</text>`;
+      labelSvg += `<line x1="${(fBR.x+lp+4).toFixed(1)}" y1="${(fBR.y-lp*0.35).toFixed(1)}" x2="${(bBR.x+lp+4).toFixed(1)}" y2="${(bBR.y-lp*0.35).toFixed(1)}" class="carton-dim-line"/>`;
+      labelSvg += `<line x1="${(fBR.x+4).toFixed(1)}" y1="${fBR.y.toFixed(1)}" x2="${(fBR.x+lp+4).toFixed(1)}" y2="${(fBR.y-lp*0.35).toFixed(1)}" class="carton-dim-line"/>`;
+      labelSvg += `<line x1="${(bBR.x+4).toFixed(1)}" y1="${bBR.y.toFixed(1)}" x2="${(bBR.x+lp+4).toFixed(1)}" y2="${(bBR.y-lp*0.35).toFixed(1)}" class="carton-dim-line"/>`;
+      labelSvg += `<text x="${((fBR.x+bBR.x)/2+lp+4).toFixed(1)}" y="${((fBR.y+bBR.y)/2-lp*0.35-4).toFixed(1)}" text-anchor="start" class="carton-dim-label">宽 ${Math.round(W)}mm</text>`;
+    } else if (view === 'left') {
+      labelSvg += `<line x1="${fBL.x.toFixed(1)}" y1="${(fBL.y+lp).toFixed(1)}" x2="${fBR.x.toFixed(1)}" y2="${(fBR.y+lp).toFixed(1)}" class="carton-dim-line"/>`;
+      labelSvg += `<line x1="${fBL.x.toFixed(1)}" y1="${(fBL.y+4).toFixed(1)}" x2="${fBL.x.toFixed(1)}" y2="${(fBL.y+lp+2).toFixed(1)}" class="carton-dim-line"/>`;
+      labelSvg += `<line x1="${fBR.x.toFixed(1)}" y1="${(fBR.y+4).toFixed(1)}" x2="${fBR.x.toFixed(1)}" y2="${(fBR.y+lp+2).toFixed(1)}" class="carton-dim-line"/>`;
+      labelSvg += `<text x="${((fBL.x+fBR.x)/2).toFixed(1)}" y="${(fBL.y+lp+14).toFixed(1)}" text-anchor="middle" class="carton-dim-label">宽 ${Math.round(W)}mm</text>`;
+      labelSvg += `<line x1="${(fBR.x+lp).toFixed(1)}" y1="${fBR.y.toFixed(1)}" x2="${(fTR.x+lp).toFixed(1)}" y2="${fTR.y.toFixed(1)}" class="carton-dim-line"/>`;
+      labelSvg += `<line x1="${(fBR.x+4).toFixed(1)}" y1="${fBR.y.toFixed(1)}" x2="${(fBR.x+lp+2).toFixed(1)}" y2="${fBR.y.toFixed(1)}" class="carton-dim-line"/>`;
+      labelSvg += `<line x1="${(fTR.x+4).toFixed(1)}" y1="${fTR.y.toFixed(1)}" x2="${(fTR.x+lp+2).toFixed(1)}" y2="${fTR.y.toFixed(1)}" class="carton-dim-line"/>`;
+      labelSvg += `<text x="${(fBR.x+lp+6).toFixed(1)}" y="${((fBR.y+fTR.y)/2+4).toFixed(1)}" text-anchor="start" class="carton-dim-label">高 ${Math.round(H)}mm</text>`;
+      labelSvg += `<line x1="${(fBR.x+lp+4).toFixed(1)}" y1="${(fBR.y-lp*0.35).toFixed(1)}" x2="${(bBR.x+lp+4).toFixed(1)}" y2="${(bBR.y-lp*0.35).toFixed(1)}" class="carton-dim-line"/>`;
+      labelSvg += `<line x1="${(fBR.x+4).toFixed(1)}" y1="${fBR.y.toFixed(1)}" x2="${(fBR.x+lp+4).toFixed(1)}" y2="${(fBR.y-lp*0.35).toFixed(1)}" class="carton-dim-line"/>`;
+      labelSvg += `<line x1="${(bBR.x+4).toFixed(1)}" y1="${bBR.y.toFixed(1)}" x2="${(bBR.x+lp+4).toFixed(1)}" y2="${(bBR.y-lp*0.35).toFixed(1)}" class="carton-dim-line"/>`;
+      labelSvg += `<text x="${((fBR.x+bBR.x)/2+lp+4).toFixed(1)}" y="${((fBR.y+bBR.y)/2-lp*0.35-4).toFixed(1)}" text-anchor="start" class="carton-dim-label">长 ${Math.round(L)}mm</text>`;
+    } else if (view === 'right') {
+      // 高标注在左侧
+      labelSvg += `<line x1="${fBL.x.toFixed(1)}" y1="${(fBL.y+lp).toFixed(1)}" x2="${fBR.x.toFixed(1)}" y2="${(fBR.y+lp).toFixed(1)}" class="carton-dim-line"/>`;
+      labelSvg += `<line x1="${fBL.x.toFixed(1)}" y1="${(fBL.y+4).toFixed(1)}" x2="${fBL.x.toFixed(1)}" y2="${(fBL.y+lp+2).toFixed(1)}" class="carton-dim-line"/>`;
+      labelSvg += `<line x1="${fBR.x.toFixed(1)}" y1="${(fBR.y+4).toFixed(1)}" x2="${fBR.x.toFixed(1)}" y2="${(fBR.y+lp+2).toFixed(1)}" class="carton-dim-line"/>`;
+      labelSvg += `<text x="${((fBL.x+fBR.x)/2).toFixed(1)}" y="${(fBL.y+lp+14).toFixed(1)}" text-anchor="middle" class="carton-dim-label">宽 ${Math.round(W)}mm</text>`;
+      labelSvg += `<line x1="${(fBL.x-lp).toFixed(1)}" y1="${fBL.y.toFixed(1)}" x2="${(fTL.x-lp).toFixed(1)}" y2="${fTL.y.toFixed(1)}" class="carton-dim-line"/>`;
+      labelSvg += `<line x1="${(fBL.x-4).toFixed(1)}" y1="${fBL.y.toFixed(1)}" x2="${(fBL.x-lp-2).toFixed(1)}" y2="${fBL.y.toFixed(1)}" class="carton-dim-line"/>`;
+      labelSvg += `<line x1="${(fTL.x-4).toFixed(1)}" y1="${fTL.y.toFixed(1)}" x2="${(fTL.x-lp-2).toFixed(1)}" y2="${fTL.y.toFixed(1)}" class="carton-dim-line"/>`;
+      labelSvg += `<text x="${(fBL.x-lp-6).toFixed(1)}" y="${((fBL.y+fTL.y)/2+4).toFixed(1)}" text-anchor="end" class="carton-dim-label">高 ${Math.round(H)}mm</text>`;
+      labelSvg += `<line x1="${(fBL.x-lp-4).toFixed(1)}" y1="${(fBL.y-lp*0.35).toFixed(1)}" x2="${(bBL.x-lp-4).toFixed(1)}" y2="${(bBL.y-lp*0.35).toFixed(1)}" class="carton-dim-line"/>`;
+      labelSvg += `<line x1="${(fBL.x-4).toFixed(1)}" y1="${fBL.y.toFixed(1)}" x2="${(fBL.x-lp-4).toFixed(1)}" y2="${(fBL.y-lp*0.35).toFixed(1)}" class="carton-dim-line"/>`;
+      labelSvg += `<line x1="${(bBL.x-4).toFixed(1)}" y1="${bBL.y.toFixed(1)}" x2="${(bBL.x-lp-4).toFixed(1)}" y2="${(bBL.y-lp*0.35).toFixed(1)}" class="carton-dim-line"/>`;
+      labelSvg += `<text x="${((fBL.x+bBL.x)/2-lp-4).toFixed(1)}" y="${((fBL.y+bBL.y)/2-lp*0.35-4).toFixed(1)}" text-anchor="end" class="carton-dim-label">长 ${Math.round(L)}mm</text>`;
+    }
+
+  } else if (view === 'top') {
+    // 俯视图：底面 + 四周翻盖（2D展开）
+    const bw = sL, bh = sW;
+    const bCX = 220, bCY = 170;
+    const bBL = {x: bCX - bw/2, y: bCY + bh/2};
+    const bBR = {x: bCX + bw/2, y: bCY + bh/2};
+    const bTR = {x: bCX + bw/2, y: bCY - bh/2};
+    const bTL = {x: bCX - bw/2, y: bCY - bh/2};
+
+    const fLen = sW * 0.45; // 前后翻盖
+    const sLen = sL * 0.45; // 左右翻盖
+    const ffL = {x: bTL.x, y: bTL.y - fLen};
+    const ffR = {x: bTR.x, y: bTR.y - fLen};
+    const fbL = {x: bBL.x, y: bBL.y + fLen};
+    const fbR = {x: bBR.x, y: bBR.y + fLen};
+    const flL = {x: bTL.x - sLen, y: bTL.y};
+    const flR = {x: bBL.x - sLen, y: bBL.y};
+    const frL = {x: bTR.x + sLen, y: bTR.y};
+    const frR = {x: bBR.x + sLen, y: bBR.y};
+
+    svgBody = `
+      <path d="${poly([flL,bTL,bBL,flR])}" fill="url(#gFlap${uid})" stroke="${cEdge}" stroke-width="0.8" stroke-linejoin="round"/>
+      <line x1="${bTL.x.toFixed(1)}" y1="${bTL.y.toFixed(1)}" x2="${flL.x.toFixed(1)}" y2="${flL.y.toFixed(1)}" stroke="rgba(74,48,24,0.35)" stroke-width="0.8" stroke-dasharray="3,2"/>
+      <path d="${poly([ffL,bTL,bTR,ffR])}" fill="url(#gFlap${uid})" stroke="${cEdge}" stroke-width="0.8" stroke-linejoin="round"/>
+      <line x1="${bTL.x.toFixed(1)}" y1="${bTL.y.toFixed(1)}" x2="${ffL.x.toFixed(1)}" y2="${ffL.y.toFixed(1)}" stroke="rgba(74,48,24,0.35)" stroke-width="0.8" stroke-dasharray="3,2"/>
+      <path d="${poly([bBL,bBR,bTR,bTL])}" fill="url(#gBot${uid})" stroke="${cEdge}" stroke-width="1" stroke-linejoin="round"/>
+      <path d="${poly([bBL,bBR,bTR,bTL])}" fill="url(#cor${uid})" opacity="0.30" pointer-events="none"/>
+      <path d="${poly([frL,bTR,bBR,frR])}" fill="url(#gFlap${uid})" stroke="${cEdge}" stroke-width="0.8" stroke-linejoin="round"/>
+      <line x1="${bTR.x.toFixed(1)}" y1="${bTR.y.toFixed(1)}" x2="${frL.x.toFixed(1)}" y2="${frL.y.toFixed(1)}" stroke="rgba(74,48,24,0.35)" stroke-width="0.8" stroke-dasharray="3,2"/>
+      <path d="${poly([fbL,bBL,bBR,fbR])}" fill="url(#gFlap${uid})" stroke="${cEdge}" stroke-width="0.8" stroke-linejoin="round"/>
+      <line x1="${bBL.x.toFixed(1)}" y1="${bBL.y.toFixed(1)}" x2="${fbL.x.toFixed(1)}" y2="${fbL.y.toFixed(1)}" stroke="rgba(74,48,24,0.35)" stroke-width="0.8" stroke-dasharray="3,2"/>
+    `;
+
+    const lp = 22;
+    labelSvg += `<line x1="${bBL.x.toFixed(1)}" y1="${(bBL.y+lp).toFixed(1)}" x2="${bBR.x.toFixed(1)}" y2="${(bBR.y+lp).toFixed(1)}" class="carton-dim-line"/>`;
+    labelSvg += `<line x1="${bBL.x.toFixed(1)}" y1="${(bBL.y+4).toFixed(1)}" x2="${bBL.x.toFixed(1)}" y2="${(bBL.y+lp+2).toFixed(1)}" class="carton-dim-line"/>`;
+    labelSvg += `<line x1="${bBR.x.toFixed(1)}" y1="${(bBR.y+4).toFixed(1)}" x2="${bBR.x.toFixed(1)}" y2="${(bBR.y+lp+2).toFixed(1)}" class="carton-dim-line"/>`;
+    labelSvg += `<text x="${((bBL.x+bBR.x)/2).toFixed(1)}" y="${(bBL.y+lp+14).toFixed(1)}" text-anchor="middle" class="carton-dim-label">长 ${Math.round(L)}mm</text>`;
+    labelSvg += `<line x1="${(bBL.x-lp).toFixed(1)}" y1="${bBL.y.toFixed(1)}" x2="${(bTL.x-lp).toFixed(1)}" y2="${bTL.y.toFixed(1)}" class="carton-dim-line"/>`;
+    labelSvg += `<line x1="${(bBL.x-4).toFixed(1)}" y1="${bBL.y.toFixed(1)}" x2="${(bBL.x-lp-2).toFixed(1)}" y2="${bBL.y.toFixed(1)}" class="carton-dim-line"/>`;
+    labelSvg += `<line x1="${(bTL.x-4).toFixed(1)}" y1="${bTL.y.toFixed(1)}" x2="${(bTL.x-lp-2).toFixed(1)}" y2="${bTL.y.toFixed(1)}" class="carton-dim-line"/>`;
+    labelSvg += `<text x="${(bBL.x-lp-6).toFixed(1)}" y="${((bBL.y+bTL.y)/2+4).toFixed(1)}" text-anchor="end" class="carton-dim-label">宽 ${Math.round(W)}mm</text>`;
+  }
+
+  return `
+    <div class="carton-preview">
+      ${btnHtml}
+      <svg viewBox="0 0 440 340" xmlns="http://www.w3.org/2000/svg"
+           style="width:100%;max-width:440px;height:auto;display:block;margin:0 auto;user-select:none;">
+        <defs>
+          <linearGradient id="gFront${uid}" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="${cFD}"/><stop offset="20%" stop-color="${cF}"/><stop offset="80%" stop-color="${cF}"/><stop offset="100%" stop-color="${cFD}"/></linearGradient>
+          <linearGradient id="gS${uid}" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="${cS}"/><stop offset="100%" stop-color="${cSD}"/></linearGradient>
+          <linearGradient id="gB${uid}" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="${cB}"/><stop offset="100%" stop-color="${cBD}"/></linearGradient>
+          <linearGradient id="gBot${uid}" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="${cBotD}"/><stop offset="100%" stop-color="${cBot}"/></linearGradient>
+          <linearGradient id="gFlap${uid}" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="${cFlap}"/><stop offset="100%" stop-color="${cFlapD}"/></linearGradient>
+          <pattern id="cor${uid}" patternUnits="userSpaceOnUse" width="10" height="5"><rect width="10" height="5" fill="transparent"/><line x1="0" y1="4.5" x2="10" y2="4.5" stroke="rgba(60,35,15,0.14)" stroke-width="0.7"/></pattern>
+        </defs>
+        ${svgBody}
+        ${labelSvg}
+      </svg>
+      <div style="text-align:center;font-size:11px;color:var(--text-secondary);margin-top:6px;opacity:0.7;">📐 ${viewNames[view]}</div>
+    </div>
+  `;
 }
 /* ================================================================
    ==================== 6. 模态框/表单 =============================
@@ -3107,6 +4079,13 @@ function showCustomerForm(id) {
         <div class="form-group"><label class="form-label">国家 *</label><input class="form-input" name="country" value="${c ? c.country : ''}" required></div>
       </div>
       <div class="form-row">
+        <div class="form-group"><label class="form-label">客户类型 *</label>
+          <select class="form-select" name="customerType" required>
+            <option value="">请选择客户类型</option>
+            <option value="distributor" ${c && c.customerType === 'distributor' ? 'selected' : ''}>🏪 经销商（转售设备）</option>
+            <option value="end_user" ${c && c.customerType === 'end_user' ? 'selected' : ''}>🏭 终端客户（直接购买设备自用）</option>
+          </select>
+        </div>
         <div class="form-group"><label class="form-label">主营产品</label><input class="form-input" name="mainProduct" value="${c ? c.mainProduct || '' : ''}"></div>
         <div class="form-group"><label class="form-label">联系人</label><input class="form-input" name="contactPerson" value="${c ? c.contactPerson || '' : ''}"></div>
       </div>
@@ -3238,6 +4217,7 @@ function saveCustomer(e) {
   const data = {
     name: fd.get('name').trim(),
     country: fd.get('country').trim(),
+    customerType: fd.get('customerType') || '',  // 客户类型：distributor / end_user
     mainProduct: fd.get('mainProduct').trim(),
     contactPerson: fd.get('contactPerson').trim(),
     email: fd.get('email').trim(),
@@ -3263,7 +4243,7 @@ function saveCustomer(e) {
     tags
   };
 
-  if (!data.name || !data.country) { Utils.toast('请填写客户名称和国家'); return false; }
+  if (!data.name || !data.country || !data.customerType) { Utils.toast('请填写客户名称、国家和客户类型'); return false; }
 
   const customers = Storage.getCustomers();
   if (isEdit) {
@@ -3867,7 +4847,6 @@ function importData(event) {
       const importScripts = Array.isArray(raw.scripts) ? raw.scripts : [];
       const importCompetitors = Array.isArray(raw.competitors) ? raw.competitors : [];
       const importFaq = Array.isArray(raw.faq) ? raw.faq : [];
-      const importMaterials = Array.isArray(raw.materials) ? raw.materials : [];
 
       if (importCustomers.length === 0) {
         Utils.toast('文件中没有找到客户数据');
@@ -4014,13 +4993,7 @@ function importData(event) {
       for (const f of importFaq) { f.id = Utils.id(); existingFaq.push(f); faqCount++; }
       if (faqCount > 0) Storage.setFaq(existingFaq);
 
-      // 导入素材库
-      let materialCount = 0;
-      const existingMaterials = Storage.getMaterials();
-      for (const m of importMaterials) { m.id = Utils.id(); existingMaterials.push(m); materialCount++; }
-      if (materialCount > 0) Storage.setMaterials(existingMaterials);
-
-      showImportResult(importCustomers.length, newCount, mergedCount, skipped.length, skipped, followupCount, quotationCount, socialMediaCount, scriptCount, faqCount, competitorCount, materialCount);
+      showImportResult(importCustomers.length, newCount, mergedCount, skipped.length, skipped, followupCount, quotationCount, socialMediaCount, scriptCount, faqCount, competitorCount, 0);
 
       event.target.value = '';
       Router.handleRoute();
@@ -4088,10 +5061,6 @@ function showImportResult(total, success, mergedCount, skippedCount, skippedName
         <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid rgba(0,0,0,0.04);">
           <span style="font-size:14px;color:var(--text-secondary);">专业问题</span>
           <span style="font-size:14px;font-weight:600;color:var(--apple-green);">${faqCount || 0} 条</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid rgba(0,0,0,0.04);">
-          <span style="font-size:14px;color:var(--text-secondary);">素材库</span>
-          <span style="font-size:14px;font-weight:600;color:var(--apple-green);">${materialCount || 0} 条</span>
         </div>
       </div>
       ${skippedHtml}
@@ -4251,7 +5220,8 @@ document.addEventListener('keydown', function(e) {
   if (mod && e.key === '6') { e.preventDefault(); Router.navigate('/scripts'); }
   if (mod && e.key === '7') { e.preventDefault(); Router.navigate('/competitors'); }
   if (mod && e.key === '8') { e.preventDefault(); Router.navigate('/faq'); }
-  if (mod && e.key === '9') { e.preventDefault(); Router.navigate('/materials'); }
+  if (mod && e.key === '9') { e.preventDefault(); Router.navigate('/calculator'); }
+  if (mod && e.key === '0') { e.preventDefault(); Router.navigate('/simulation'); }
   if (e.key === 'Escape') { closeModal(); }
   const route = Router.currentRoute || '';
   if (route.indexOf('/customer?id=') >= 0 || route.indexOf('/customer?') >= 0) {
@@ -4472,5 +5442,732 @@ document.addEventListener('DOMContentLoaded', init);
   });
 })();
 </script>
+
+<!-- ===== 模拟沟通模块 ===== -->
+<script>
+/* ================================================================
+   ==================== 模拟沟通 =============================
+   ================================================================ */
+
+// 所有数据定义
+var SimCountries = ['泰国','印尼','越南','马来西亚','印度','美国','巴西','墨西哥','土耳其','埃及','南非','俄罗斯','波兰','德国','法国','英国'];
+var SimScales = ['小型包装厂（年采购<50万USD）','中型包装厂（年采购50-200万USD）','大型包装厂（年采购>200万USD）','经销商/代理商','终端品牌商'];
+var SimProducts = ['食品包装箱','电子产品包装','物流运输箱','电商快递箱','农业产品箱','医药包装箱','饮料包装箱','其他'];
+var SimChannels = ['WhatsApp','邮件','微信','电话'];
+var SimModes = ['主动开发','被动获客'];
+
+var simState = null;
+
+// 辅助函数：随机选择数组元素
+function simRand(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+// 生成随机客户姓名
+function simGetCustomerName() {
+  var first = ['Somchai','Surachai','Budi','Agus','Wei','Zhang','John','Carlos','Ahmed','Mohamed','Ivan','Petr','Hans','Pierre','James','Robert','Mike','David','Tom','Kevin'];
+  var last = ['Trading','Co.Ltd.','Packaging','Industries','Machinery','Solutions','Enterprise','Group','Corp','Co.'];
+  return simRand(first) + ' ' + simRand(last);
+}
+
+// 渲染模拟沟通设置页面 - 使用字符串拼接，避免模板字符串
+Router.renderSimulation = function(content, titleEl, subtitleEl, actions) {
+  titleEl.textContent = '模拟沟通';
+  subtitleEl.textContent = '模拟与客户的实战沟通，提升销售技巧';
+  actions.innerHTML = '';
+  simState = null;
+
+  var saved = JSON.parse(sessionStorage.getItem('sim_settings') || '{}');
+  
+  // 构建国家选项
+  var countryOptions = '<option value="">请选择</option>';
+  for (var i = 0; i < SimCountries.length; i++) {
+    var c = SimCountries[i];
+    var selected = (saved.country === c) ? ' selected' : '';
+    countryOptions += '<option' + selected + '>' + c + '</option>';
+  }
+  
+  // 构建规模选项
+  var scaleOptions = '<option value="">请选择</option>';
+  for (var i = 0; i < SimScales.length; i++) {
+    var s = SimScales[i];
+    var selected = (saved.scale === s) ? ' selected' : '';
+    scaleOptions += '<option' + selected + '>' + s + '</option>';
+  }
+  
+  // 构建产品选项
+  var productOptions = '<option value="">请选择</option>';
+  for (var i = 0; i < SimProducts.length; i++) {
+    var p = SimProducts[i];
+    var selected = (saved.product === p) ? ' selected' : '';
+    productOptions += '<option' + selected + '>' + p + '</option>';
+  }
+  
+  // 构建渠道选项
+  var channelOptions = '<option value="">请选择</option>';
+  for (var i = 0; i < SimChannels.length; i++) {
+    var c = SimChannels[i];
+    var selected = (saved.channel === c) ? ' selected' : '';
+    channelOptions += '<option' + selected + '>' + c + '</option>';
+  }
+  
+  var typeSelected1 = (saved.type === '终端') ? ' selected' : '';
+  var typeSelected2 = (saved.type === '经销商') ? ' selected' : '';
+  var modeSelected1 = (saved.mode === '主动') ? ' selected' : '';
+  var modeSelected2 = (saved.mode === '被动') ? ' selected' : '';
+  var diffSelected1 = (saved.difficulty === '简单') ? ' selected' : '';
+  var diffSelected2 = (saved.difficulty === '中等') ? ' selected' : '';
+  var diffSelected3 = (saved.difficulty === '困难') ? ' selected' : '';
+  var roleSelected1 = (saved.customerRole === '专业采购') ? ' selected' : '';
+  var roleSelected2 = (saved.customerRole === '小白老板') ? ' selected' : '';
+  var roleSelected3 = (saved.customerRole === '技术工程师') ? ' selected' : '';
+  var roleSelected4 = (saved.customerRole === '决策老板') ? ' selected' : '';
+  
+  content.innerHTML = 
+    '<div class="card" style="margin-bottom:20px;">' +
+      '<div style="font-size:16px;font-weight:600;margin-bottom:16px;color:var(--text-primary);">模拟沟通设置</div>' +
+      '<div class="sim-setup-grid">' +
+        '<div class="sim-setup-item">' +
+          '<label class="sim-setup-label">客户国家/地区</label>' +
+          '<select class="sim-setup-select" id="sim-country">' +
+            countryOptions +
+          '</select>' +
+        '</div>' +
+        '<div class="sim-setup-item">' +
+          '<label class="sim-setup-label">客户规模</label>' +
+          '<select class="sim-setup-select" id="sim-scale">' +
+            scaleOptions +
+          '</select>' +
+        '</div>' +
+        '<div class="sim-setup-item">' +
+          '<label class="sim-setup-label">主营产品类型</label>' +
+          '<select class="sim-setup-select" id="sim-product">' +
+            productOptions +
+          '</select>' +
+        '</div>' +
+        '<div class="sim-setup-item">' +
+          '<label class="sim-setup-label">客户类型</label>' +
+          '<select class="sim-setup-select" id="sim-type">' +
+            '<option value="">请选择</option>' +
+            '<option' + typeSelected1 + '>终端用户（直接购买设备自用）</option>' +
+            '<option' + typeSelected2 + '>经销商（转售设备）</option>' +
+          '</select>' +
+        '</div>' +
+        '<div class="sim-setup-item">' +
+          '<label class="sim-setup-label">沟通媒介</label>' +
+          '<select class="sim-setup-select" id="sim-channel">' +
+            channelOptions +
+          '</select>' +
+        '</div>' +
+        '<div class="sim-setup-item">' +
+          '<label class="sim-setup-label">获客方式</label>' +
+          '<select class="sim-setup-select" id="sim-mode">' +
+            '<option value="">请选择</option>' +
+            '<option' + modeSelected1 + '>主动开发（我主动联系客户）</option>' +
+            '<option' + modeSelected2 + '>被动获客（客户主动联系我）</option>' +
+          '</select>' +
+        '</div>' +
+        '<div class="sim-setup-item">' +
+          '<label class="sim-setup-label">难度级别</label>' +
+          '<select class="sim-setup-select" id="sim-difficulty">' +
+            '<option value="">请选择</option>' +
+            '<option' + diffSelected1 + '>简单（新手客户，容易沟通）</option>' +
+            '<option' + diffSelected2 + '>中等（有经验，会问专业问题）</option>' +
+            '<option' + diffSelected3 + '>困难（行业专家，要求很高）</option>' +
+          '</select>' +
+        '</div>' +
+        '<div class="sim-setup-item">' +
+          '<label class="sim-setup-label">客户角色</label>' +
+          '<select class="sim-setup-select" id="sim-customer-role">' +
+            '<option value="">请选择</option>' +
+            '<option' + roleSelected1 + '>专业采购（懂技术，关注参数和价格）</option>' +
+            '<option' + roleSelected2 + '>小白老板（不懂技术，只关心能不能用）</option>' +
+            '<option' + roleSelected3 + '>技术工程师（非常专业，会问很深的技术问题）</option>' +
+            '<option' + roleSelected4 + '>决策老板（关注ROI、回本周期、保修）</option>' +
+          '</select>' +
+        '</div>' +
+      '</div>' +
+      '<button class="btn btn-primary btn-lg" onclick="simStart()" style="width:100%;">' +
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px;"><polygon points="5 3 19 12 5 21 5 3"/></svg>' +
+        '开始模拟' +
+      '</button>' +
+    '</div>' +
+    '<div id="sim-chat-container"></div>';
+};
+
+function simStart() {
+  var country = document.getElementById('sim-country').value;
+  var scale = document.getElementById('sim-scale').value;
+  var product = document.getElementById('sim-product').value;
+  var type = document.getElementById('sim-type').value;
+  var channel = document.getElementById('sim-channel').value;
+  var modeRaw = document.getElementById('sim-mode').value;
+  var difficulty = document.getElementById('sim-difficulty').value;
+  var customerRole = document.getElementById('sim-customer-role').value;
+
+  if (!country || !scale || !product || !type || !channel || !modeRaw || !difficulty || !customerRole) {
+    Utils.toast('请完整填写所有设置项');
+    return;
+  }
+
+  var mode = modeRaw.indexOf('主动') !== -1 ? '主动' : '被动';
+  var customerName = simGetCustomerName();
+  var companyName = 'PT. ' + simRand(['Bangkok','Jakarta','Sao Paulo','Istanbul','Moscow','Shanghai','Mumbai','Cairo','Berlin','Paris']) + ' ' + simRand(['Pack','Box','Carton','Corrugated']);
+
+  simState = {
+    country: country,
+    scale: scale,
+    product: product,
+    type: type.indexOf('终端') !== -1 ? '终端' : '经销商',
+    channel: channel,
+    mode: mode,
+    difficulty: difficulty,
+    customerRole: customerRole,
+    customerName: customerName,
+    companyName: companyName,
+    phase: 0,
+    phases: ['开场','需求挖掘','产品介绍','报价讨论','谈判/成交'],
+    messages: [],
+    askedQuestions: [],  // 跟踪已问过的问题，避免重复
+    startTime: Date.now(),
+    scores: { professional: 0, responsiveness: 0, productKnowledge: 0, negotiation: 0 }
+  };
+
+  // 保存设置
+  sessionStorage.setItem('sim_settings', JSON.stringify({ country: country, scale: scale, product: product, type: simState.type, channel: channel, mode: mode }));
+
+  var container = document.getElementById('sim-chat-container');
+  
+  // 构建进度点
+  var dotsHtml = '';
+  for (var i = 0; i < simState.phases.length; i++) {
+    var p = simState.phases[i];
+    var activeClass = (i === 0) ? ' active' : '';
+    dotsHtml += '<div class="sim-dot' + activeClass + '" id="sim-dot-' + i + '" title="' + p + '"></div>';
+  }
+  
+  container.innerHTML = 
+    '<div class="sim-chat-area" id="sim-chat-area">' +
+      '<div class="sim-chat-header">' +
+        '<div>' +
+          '<div class="sim-chat-customer">' + customerName + '</div>' +
+          '<div class="sim-chat-meta">' + companyName + ' · ' + country + ' · ' + channel + '</div>' +
+        '</div>' +
+        '<div class="sim-progress-dots" title="沟通进度">' +
+          dotsHtml +
+        '</div>' +
+      '</div>' +
+      '<div class="sim-chat-body" id="sim-chat-body"></div>' +
+      '<div class="sim-chat-actions" id="sim-chat-actions">' +
+        '<button class="sim-btn-suggest" onclick="simSuggest()">' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>' +
+          '建议' +
+        '</button>' +
+        '<button class="sim-btn-end" onclick="simEnd()">结束沟通</button>' +
+      '</div>' +
+      '<div class="sim-chat-footer" id="sim-chat-footer">' +
+        '<textarea class="sim-chat-input" id="sim-input" placeholder="输入您的回复..." rows="1" oninput="this.style.height=\'auto\';this.style.height=Math.min(this.scrollHeight,100)+\'px\';"></textarea>' +
+        '<button class="sim-chat-send" onclick="simSend()" id="sim-send-btn">' +
+          '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>' +
+        '</button>' +
+      '</div>' +
+    '</div>';
+
+  // 回车发送
+  document.getElementById('sim-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); simSend(); }
+  });
+
+  // 第一条消息
+  var isActiveMode = (mode === '主动');
+  setTimeout(function() {
+    if (isActiveMode) {
+      simAddMsg('user', simGenOpener());
+      setTimeout(function() { simAddMsg('cust', simGenReply('greeting')); }, 1200);
+    } else {
+      simAddMsg('cust', simGenInquiry());
+    }
+  }, 600);
+}
+
+function simGenOpener() {
+  var openers = [
+    'Hello, this is Sophie from Cangzhou Huayu Carton Machinery. We are a leading manufacturer of flexo printer slotter die-cutters with 25+ years of experience. I am writing to introduce our products to you.',
+    'Dear Sir/Madam, I hope this message finds you well. I am Sophie with Cangzhou Huayu, a top Chinese manufacturer of carton machinery. I would like to share our latest catalog with you.',
+    'Hi there! This is Sophie from Huayu Carton Machinery (China). We have been the No.1 seller in the carton machine industry for 13 consecutive years. Would you be interested in learning more about our equipment?'
+  ];
+  return simRand(openers);
+}
+
+function simGenInquiry() {
+  var inquiries = [
+    'Hello Sophie, I saw your message on WhatsApp or received your email. We are looking for a new flexo printer for our factory. Can you send me your catalog and price list?',
+    'Hi, I am interested in your carton machinery. We need to upgrade our production line. What models do you recommend for a medium-sized packaging factory?',
+    'Good day, we are a distributor in ' + simState.country + '. We have a client asking about flexo printer slotter machines. Can you provide a quotation?',
+    'Hello, we are currently using old machines and facing efficiency issues. Can you recommend a solution? What is your delivery time and warranty?'
+  ];
+  return simRand(inquiries);
+}
+
+function simGenReply(phase) {
+  // 获取用户上一句话
+  var userMsgs = [];
+  for (var i = 0; i < simState.messages.length; i++) {
+    if (simState.messages[i].who === 'user') {
+      userMsgs.push(simState.messages[i].text);
+    }
+  }
+  var lastUserMsg = userMsgs.length > 0 ? userMsgs[userMsgs.length - 1] : '';
+  var lastMsgLower = lastUserMsg.toLowerCase();
+  
+  // 根据客户角色和难度，生成不同的回复
+  var replies = [];
+  
+  // 专业采购的回复
+  if (simState.customerRole.indexOf('专业采购') !== -1) {
+    if (phase === 'greeting') {
+      replies = [
+        '你好，我们公司正在考虑更新设备。你们是生产厂家吗？能发一下产品目录吗？',
+        '我们是需要采购一台新的印刷机。你们机器的主要优势是什么？',
+        '我们看过你们的产品介绍。能详细介绍一下技术参数吗？'
+      ];
+    } else if (phase === 'intro') {
+      replies = [
+        '谢谢介绍。你们HY-1224型号的印刷速度是多少？精度能达到多少？',
+        '我们需要生产食品包装箱。你们机器能处理B瓦楞纸板吗？',
+        '你们在' + simState.country + '有客户吗？能提供一些参考案例吗？'
+      ];
+    } else if (phase === 'qa') {
+      replies = [
+        '保修期是多久？如果机器出现故障，你们能提供远程支持吗？',
+        '安装和培训是怎么安排的？我们需要准备什么？',
+        '你们机器使用的油墨是什么类型？是否符合食品安全标准？'
+      ];
+    } else if (phase === 'quote') {
+      replies = [
+        '报价收到了。价格能不能再优惠一些？如果我们订2台，能给什么折扣？',
+        '报价中的交货期是3个月，能不能缩短到2个月？',
+        '付款方式能不能用LC 60天？我们的资金周转需要时间。'
+      ];
+    } else if (phase === 'negotiation') {
+      replies = [
+        '好的，价格我们可以接受。能先寄一台样机给我们测试吗？',
+        '合同条款我看过了。能再加一条：如果机器6个月内出现重大故障，要免费更换新机。',
+        '我们准备下单了。能安排你们的技术员来我们工厂安装和培训吗？'
+      ];
+    }
+  }
+  
+  // 小白老板的回复
+  if (simState.customerRole.indexOf('小白老板') !== -1) {
+    if (phase === 'greeting') {
+      replies = [
+        '你好，我听说你们是做纸箱机械的。这个机器好用吗？',
+        '我们工厂想买台新机器，但我对这个不太懂。你能简单介绍一下吗？',
+        '朋友推荐我联系你们。你们机器贵不贵啊？'
+      ];
+    } else if (phase === 'intro') {
+      replies = [
+        '听起来不错。这个机器需要几个人操作啊？我们工人文化程度不高。',
+        '维修麻烦吗？我们这边没有专业维修人员。',
+        '机器耗电量大吗？我们这边电费挺贵的。'
+      ];
+    } else if (phase === 'qa') {
+      replies = [
+        '保修多久啊？坏了怎么办？',
+        '你们能派人来教我们怎么用吗？',
+        '机器容易坏吗？我们用不了太复杂的东西。'
+      ];
+    } else if (phase === 'quote') {
+      replies = [
+        '价格有点贵啊。能不能便宜点？我们预算有限。',
+        '这个价格是包含安装的吧？不会再有其他费用了吧？',
+        '能不能用分期付款？我们一下子拿不出这么多钱。'
+      ];
+    } else if (phase === 'negotiation') {
+      replies = [
+        '好吧，价格就按你们说的。什么时候能发货？',
+        '合同我看了，没什么问题。什么时候签合同？',
+        '我们先订一台，用得好再订第二台。可以吧？'
+      ];
+    }
+  }
+  
+  // 技术工程师的回复（难度更高）
+  if (simState.customerRole.indexOf('技术工程师') !== -1) {
+    if (phase === 'greeting') {
+      replies = [
+        '你好。我看了你们的技术资料。有几个问题想确认一下。',
+        '我们是技术部门。想了解一下你们机器的控制系统是用什么的？',
+        '你们机器的最高印刷速度是多少？在实际生产中能稳定达到吗？'
+      ];
+    } else if (phase === 'intro') {
+      replies = [
+        '印刷精度±0.5mm？你们是怎么保证这个精度的？用的是伺服系统吗？',
+        '我们生产的是高精度电子包装。你们机器能处理的最小楞型是多少？',
+        '你们机器的电气系统是用哪家的？西门子还是三菱？能不能用我们的标准？'
+      ];
+    } else if (phase === 'qa') {
+      replies = [
+        '油墨循环系统是怎么设计的？清洗方便吗？我们换色频率很高。',
+        '机器的噪音水平是多少分贝？我们工厂对噪音有严格限制。',
+        '你们能提供设备的3D模型吗？我们需要做厂房布局规划。'
+      ];
+    } else if (phase === 'quote') {
+      replies = [
+        '报价我看了。技术配置能达到我们要求吗？特别是电气控制系统。',
+        '交货期90天太长了。我们项目等不及。能不能加急？加急费多少？',
+        '报价中包含备品备件吗？我们需要单独采购吗？'
+      ];
+    } else if (phase === 'negotiation') {
+      replies = [
+        '技术条款我们可以接受。但付款方式要改成：预付30%，发货前付60%，验收后付10%。',
+        '我们需要你们提供详细的技术承诺书。包括精度、速度、故障率等指标。',
+        '可以签合同。但你们要承诺：如果技术指标达不到，要退货退款。'
+      ];
+    }
+  }
+  
+  // 决策老板的回复
+  if (simState.customerRole.indexOf('决策老板') !== -1) {
+    if (phase === 'greeting') {
+      replies = [
+        '你好。我们公司正在扩大产能，需要增加生产线。你们有什么推荐？',
+        '我是公司的老板。我想了解一下你们设备的投资回报情况。',
+        '我们打算投资一条新的纸箱生产线。你们能做整线方案吗？'
+      ];
+    } else if (phase === 'intro') {
+      replies = [
+        '投资回报期多长？我们算了一下，大概需要2年才能回本。',
+        '你们和其他品牌比，优势在哪里？为什么我们要选你们而不是德国机器？',
+        '你们公司做了多久了？有没有可能做不下去，我们的保修就没了？'
+      ];
+    } else if (phase === 'qa') {
+      replies = [
+        '保修期外的维修费用高吗？你们配件价格怎么样？',
+        '如果机器出现问题，影响生产，你们怎么赔偿？',
+        '你们能提供金融方案吗？我们可以接受融资租赁。'
+      ];
+    } else if (phase === 'quote') {
+      replies = [
+        '报价我看了。总投资要50万美元，有点高。能不能降到45万？',
+        '这个报价是FOB价还是CIF价？运费和保险费谁出？',
+        '如果一次性订整条生产线，能给多少折扣？'
+      ];
+    } else if (phase === 'negotiation') {
+      replies = [
+        '好吧，就按45万美元。但你们要承诺18个月内回本，否则要补偿。',
+        '合同可以签。但我要加一条：如果机器故障导致停产，你们要按天赔偿。',
+        '可以。什么时候能开始执行合同？我们要尽快投产。'
+      ];
+    }
+  }
+  
+  // 根据难度级别调整回复（困难模式下，客户会更挑剔）
+  if (simState.difficulty === '困难') {
+    // 有30%概率客户会提出额外要求或质疑
+    if (Math.random() < 0.3) {
+      replies.push('这个我还是不太满意。你们能不能再改进一下方案？');
+      replies.push('我听说你们竞争对手的价格更便宜。为什么我们要选你们？');
+      replies.push('我们需要再考虑考虑。这几天我会再联系你们的。');
+    }
+  }
+  
+  // 过滤掉已讨论过的话题（避免重复）
+  var filteredReplies = [];
+  for (var i = 0; i < replies.length; i++) {
+    var reply = replies[i];
+    var isDuplicate = false;
+    for (var j = 0; j < simState.askedQuestions.length; j++) {
+      if (reply.indexOf(simState.askedQuestions[j]) !== -1) {
+        isDuplicate = true;
+        break;
+      }
+    }
+    if (!isDuplicate) {
+      filteredReplies.push(reply);
+    }
+  }
+  
+  // 如果过滤后没有回复了，就使用原始回复列表
+  if (filteredReplies.length === 0) {
+    filteredReplies = replies;
+  }
+  
+  // 随机选择一条回复
+  var selectedReply = filteredReplies[Math.floor(Math.random() * filteredReplies.length)];
+  
+  // 将讨论的话题添加到 askedQuestions
+  // 简单提取关键词（取回复的前20个字符作为话题标识）
+  var topic = selectedReply.substring(0, 20);
+  simState.askedQuestions.push(topic);
+  
+  return selectedReply;
+}
+
+function simAddMsg(who, text) {
+  var body = document.getElementById('sim-chat-body');
+  if (!body) return;
+  var now = new Date();
+  var timeStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  var div = document.createElement('div');
+  div.className = 'sim-msg sim-msg-' + who;
+  div.innerHTML = '<div class="sim-msg-bubble">' + text + '</div><div class="sim-msg-time">' + timeStr + '</div>';
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+  simState.messages.push({ who: who, text: text, time: now.toISOString() });
+}
+
+function simSend() {
+  var input = document.getElementById('sim-input');
+  var text = input.value.trim();
+  if (!text) return;
+  simAddMsg('user', text);
+  input.value = '';
+  input.style.height = 'auto';
+
+  // 更新分数（简单关键词检测）
+  simScore(text);
+
+  // 模拟打字效果
+  var body = document.getElementById('sim-chat-body');
+  var typing = document.createElement('div');
+  typing.className = 'sim-msg sim-msg-cust';
+  typing.id = 'sim-typing';
+  typing.innerHTML = '<div class="sim-msg-bubble" style="opacity:0.5;">正在输入...</div>';
+  body.appendChild(typing);
+  body.scrollTop = body.scrollHeight;
+
+  setTimeout(function() {
+    var el = document.getElementById('sim-typing');
+    if (el) el.remove();
+    var phaseNames = ['greeting','intro','qa','quote','negotiation'];
+    var nextPhase = simState.phase < 4 ? phaseNames[simState.phase + 1] : phaseNames[4];
+    // 有30%概率推进阶段
+    if (Math.random() < 0.3 && simState.phase < 4) {
+      simState.phase++;
+      simUpdateDots();
+    }
+    var reply = simGenReply(nextPhase);
+    simAddMsg('cust', reply);
+  }, 1000 + Math.random() * 2000);
+}
+
+function simScore(text) {
+  var t = text.toLowerCase();
+  // 专业性：提到技术参数、公司优势
+  if (t.match(/speed|precision|accuracy|efficiency|warranty|experience|year|iso|ce/)) simState.scores.professional += 1;
+  // 响应性：回复长度适中
+  if (text.length > 20 && text.length < 500) simState.scores.responsiveness += 1;
+  // 产品知识
+  if (t.match(/flexo|printer|slotter|die.cut|hy-1224|hy-1428|corrugat/)) simState.scores.productKnowledge += 1;
+  // 谈判技巧
+  if (t.match(/discount|price|delivery|payment|install|training|free|extra/)) simState.scores.negotiation += 1;
+}
+
+function simUpdateDots() {
+  for (var i = 0; i < simState.phases.length; i++) {
+    var dot = document.getElementById('sim-dot-' + i);
+    if (dot) dot.classList.toggle('active', i <= simState.phase);
+  }
+}
+
+function simSuggest() {
+  var phaseNames = ['开场','需求挖掘','产品介绍','报价讨论','谈判/成交'];
+  var currentPhase = phaseNames[simState.phase] || '开场';
+  var suggestions = [];
+  var improvements = [];
+
+  if (simState.phase === 0) {
+    suggestions = [
+      '🎯 简要介绍公司和核心优势（25年经验、13年销量第一）',
+      '📎 主动提供产品目录（PDF或视频链接）',
+      '❓ 询问客户当前使用的设备和痛点',
+      '⏰ 注意：主动开发时不要太push，保持礼貌'
+    ];
+    improvements = ['介绍公司时突出差异化优势','询问客户现状以了解需求'];
+  } else if (simState.phase === 1) {
+    suggestions = [
+      '📊 根据客户需求推荐合适型号（不要推最贵的）',
+      '🏭 分享同地区成功案例（增加信任感）',
+      '🎥 提供机器运行视频（比图片更有说服力）',
+      '💰 提前准备好价格区间，但不要立即报死价'
+    ];
+    improvements = ['推荐型号要匹配客户需求','提供社会证明（案例）'];
+  } else if (simState.phase === 2) {
+    suggestions = [
+      '✅ 详细回答技术参数问题，展示专业性',
+      '🛠 强调售后服务（安装、培训、备件）',
+      '🌍 说明海外服务能力和响应时间',
+      '💳 主动提及付款方式（LC、TT等）'
+    ];
+    improvements = ['回答要专业且简洁','主动解决客户顾虑'];
+  } else if (simState.phase === 3) {
+    suggestions = [
+      '📄 报价单要详细（型号、配置、交期、付款条款）',
+      '🎁 可以预留一些谈判空间（但不要虚高）',
+      '🚢 主动说明贸易术语（FOB、CIF等）',
+      '⏳ 设置报价有效期，创造紧迫感'
+    ];
+    improvements = ['报价要专业且完整','预留谈判空间'];
+  } else {
+    suggestions = [
+      '🤝 倾听客户的顾虑，不要急于反驳',
+      '💡 提供额外的价值（免费配件、延长保修等）',
+      '📝 确认所有细节，准备合同',
+      '📞 如果客户犹豫，建议视频会议深入沟通'
+    ];
+    improvements = ['谈判要有耐心','寻找双赢方案'];
+  }
+
+  // 分析已发送的消息，给出针对性建议
+  var userMsgs = simState.messages.filter(function(m) { return m.who === 'user'; });
+  var lastUserMsg = userMsgs.length > 0 ? userMsgs[userMsgs.length - 1].text : '';
+
+  var html = '<div style="font-size:15px;font-weight:600;margin-bottom:12px;color:var(--apple-blue);">💡 沟通建议（当前阶段：' + currentPhase + '）</div>';
+  html += '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:12px;">以下是针对当前沟通阶段的建议：</div>';
+  html += '<ul class="sim-summary-list sim-summary-tip" style="margin-bottom:16px;">';
+  for (var s = 0; s < suggestions.length; s++) {
+    html += '<li>' + suggestions[s] + '</li>';
+  }
+  html += '</ul>';
+  html += '<div style="font-size:13px;font-weight:600;color:var(--apple-green);margin-bottom:8px;">📈 可改进方向</div>';
+  html += '<ul class="sim-summary-list sim-summary-tip">';
+  for (var i = 0; i < improvements.length; i++) {
+    html += '<li>' + improvements[i] + '</li>';
+  }
+  html += '</ul>';
+
+  if (lastUserMsg) {
+    html += '<div style="margin-top:16px;padding:12px;background:rgba(0,122,255,0.05);border-radius:10px;font-size:12px;color:var(--text-secondary);">';
+    html += '<div style="font-weight:600;margin-bottom:6px;">您上一条回复分析：</div>';
+    html += '<div style="line-height:1.6;">';
+    if (lastUserMsg.length < 20) html += '⚠️ 回复偏短，可以更安全详细地介绍产品和公司优势。<br>';
+    if (!lastUserMsg.match(/\?[？]/)) html += '💡 可以提一个开放式问题，引导客户多说一些需求。<br>';
+    if (lastUserMsg.match(/price|discount|cheap/)) html += '✅ 主动讨论价格是好的，但先建立价值再谈价格效果更好。';
+    if (!lastUserMsg.match(/[？\?]/) && lastUserMsg.length > 50) html += '👍 回复内容充实，建议加一个问题让对话继续。';
+    html += '</div></div>';
+  }
+
+  openModal(html);
+}
+
+function simEnd() {
+  if (!simState) return;
+  var duration = Math.round((Date.now() - simState.startTime) / 1000 / 60 * 10) / 10;
+  var msgCount = simState.messages.length;
+  var userMsgCount = 0;
+  
+  // 计算用户消息数量
+  for (var i = 0; i < simState.messages.length; i++) {
+    if (simState.messages[i].who === 'user') userMsgCount++;
+  }
+
+  // 生成总结
+  var goodPoints = [];
+  var badPoints = [];
+  var tips = [];
+
+  // 根据分数分析
+  if (simState.scores.professional >= 2) {
+    goodPoints.push('专业性表现好，能准确提及产品技术参数');
+  } else {
+    badPoints.push('可以更多地提及产品技术参数和公司优势，建立专业形象');
+  }
+
+  if (simState.scores.productKnowledge >= 1) {
+    goodPoints.push('产品知识运用得当，能结合产品特点沟通');
+  } else {
+    badPoints.push('建议提前准备好产品资料，更流畅地介绍产品特点');
+  }
+
+  if (simState.scores.negotiation >= 1) {
+    goodPoints.push('谈判技巧运用合理，能主动讨论价格和条款');
+  } else {
+    tips.push('谈判阶段可以主动提出一些flexible的方案，如折扣条件、额外配件等');
+  }
+
+  if (userMsgCount >= 4) {
+    goodPoints.push('沟通充分，多次主动回复客户');
+  } else {
+    tips.push('可以多问开放式问题，引导客户表达更多需求');
+  }
+
+  if (simState.phase >= 3) {
+    goodPoints.push('成功推进到较深沟通阶段（' + simState.phases[simState.phase] + '）');
+  } else {
+    badPoints.push('沟通阶段推进较慢，可以尝试更主动地引导对话向深处发展');
+  }
+
+  // 默认补充
+  if (goodPoints.length === 0) goodPoints.push('完成了一次完整的模拟沟通练习');
+  if (badPoints.length === 0) badPoints.push('整体表现良好，继续保持');
+  tips.push('每次主动开发前，提前准备好客户背景资料和对话提纲');
+  tips.push('定期练习，熟悉产品介绍话术和常见Q&A');
+
+  // 构建HTML - 使用字符串拼接，避免模板字符串
+  var html = '<div class="sim-summary">' +
+    '<div class="sim-summary-title">📊 模拟沟通总结</div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">' +
+      '<div style="padding:12px;background:rgba(0,122,255,0.05);border-radius:10px;text-align:center;">' +
+        '<div style="font-size:12px;color:var(--text-secondary);">沟通时长</div>' +
+        '<div style="font-size:24px;font-weight:700;color:var(--apple-blue);">' + (duration < 1 ? '<1' : duration) + ' 分钟</div>' +
+      '</div>' +
+      '<div style="padding:12px;background:rgba(52,199,89,0.05);border-radius:10px;text-align:center;">' +
+        '<div style="font-size:12px;color:var(--text-secondary);">对话轮次</div>' +
+        '<div style="font-size:24px;font-weight:700;color:var(--apple-green);">' + msgCount + ' 条</div>' +
+      '</div>' +
+      '<div style="padding:12px;background:rgba(255,149,0,0.05);border-radius:10px;text-align:center;">' +
+        '<div style="font-size:12px;color:var(--text-secondary);">推进阶段</div>' +
+        '<div style="font-size:20px;font-weight:700;color:var(--apple-orange);">' + simState.phases[simState.phase] + '</div>' +
+      '</div>' +
+      '<div style="padding:12px;background:rgba(175,82,222,0.05);border-radius:10px;text-align:center;">' +
+        '<div style="font-size:12px;color:var(--text-secondary);">您的回复</div>' +
+        '<div style="font-size:24px;font-weight:700;color:#AF52DE;">' + userMsgCount + ' 条</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="sim-summary-section">' +
+      '<div class="sim-summary-label" style="color:var(--apple-green);">✅ 表现好的方面</div>' +
+      '<ul class="sim-summary-list sim-summary-good">';
+  
+  for (var g = 0; g < goodPoints.length; g++) {
+    html += '<li>' + goodPoints[g] + '</li>';
+  }
+  
+  html += '</ul>' +
+    '</div>' +
+    '<div class="sim-summary-section">' +
+      '<div class="sim-summary-label" style="color:var(--apple-red);">⚠️ 需要改进的方面</div>' +
+      '<ul class="sim-summary-list sim-summary-bad">';
+  
+  for (var b = 0; b < badPoints.length; b++) {
+    html += '<li>' + badPoints[b] + '</li>';
+  }
+  
+  html += '</ul>' +
+    '</div>' +
+    '<div class="sim-summary-section">' +
+      '<div class="sim-summary-label" style="color:var(--apple-orange);">💡 日后改进建议</div>' +
+      '<ul class="sim-summary-list sim-summary-tip">';
+  
+  for (var t = 0; t < tips.length; t++) {
+    html += '<li>' + tips[t] + '</li>';
+  }
+  
+  html += '</ul>' +
+    '</div>' +
+    '<button class="btn btn-primary" onclick="closeModal()" style="width:100%;margin-top:20px;">完成</button>' +
+  '</div>';
+
+  document.getElementById('sim-chat-container').innerHTML = '';
+  openModal(html);
+  simState = null;
+}
+
+</script>
+<script src="js/carton-wiki-data.js"></script>
+<script src="js/carton-wiki.js"></script>
+<script src="js/carton-wiki-svg.js"></script>
+<script src="js/image-storage.js"></script>
 </body>
 </html>

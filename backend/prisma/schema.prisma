@@ -1,0 +1,239 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  password      String
+  name          String?
+  companyName   String?
+  timezone      String   @default("Asia/Shanghai")
+  language      String   @default("zh")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // AI Keys (encrypted)
+  claudeApiKey    String?
+  openaiApiKey    String?
+  googleApiKey    String?
+
+  // SMTP Settings (encrypted)
+  smtpHost      String?
+  smtpPort      Int?
+  smtpUser      String?
+  smtpPass      String?
+  smtpFromEmail String?
+  smtpFromName  String?
+
+  // WhatsApp Settings
+  whatsappApiKey  String?
+  whatsappApiUrl  String?
+
+  // Sending Thresholds
+  dailyEmailLimit   Int     @default(200)
+  whatsappDailyLimit Int    @default(50)
+  emailCooldownMin  Int     @default(3)
+
+  // Company Profile
+  companyProfile  Json?
+  products        Json?
+
+  // Relations
+  customers     Customer[]
+  emailCampaigns EmailCampaign[]
+  tasks         AutomationTask[]
+  apiKeys       ApiKey[]
+  activityLogs  ActivityLog[]
+  reports       AiReport[]
+
+  @@map("users")
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  company   String?
+  website   String?
+  description String?
+  industry  String?
+  country   String?
+  size      String?
+  score        Int      @default(0)
+  status       String   @default("lead") // lead, contacted, following, quoted, won, dormant
+  customerType String?  // end_user, distributor
+  tags         String[]
+  source       String?  // google_search, customs_data, manual_import
+  notes          String?
+  backgroundCheck String?
+  nextFollowUp DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  contacts    Contact[]
+  interactions Interaction[]
+  quotes      Quote[]
+
+  @@map("customers")
+}
+
+model Contact {
+  id        String   @id @default(cuid())
+  name      String?
+  position  String?
+  email     String?
+  phone     String?
+  whatsapp  String?
+  linkedin  String?
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@map("contacts")
+}
+
+model Interaction {
+  id        String   @id @default(cuid())
+  type      String   // email, whatsapp, call, note
+  direction String   // outbound, inbound
+  content   String?
+  status    String   // sent, delivered, opened, clicked, replied, failed
+  sentAt    DateTime @default(now())
+  metadata  Json?
+
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  campaignId  String?
+  campaign    EmailCampaign? @relation(fields: [campaignId], references: [id])
+
+  @@map("interactions")
+}
+
+model EmailCampaign {
+  id        String   @id @default(cuid())
+  name      String
+  subject   String?
+  content   String?
+  language  String   @default("en")
+  status    String   @default("draft") // draft, sending, sent, paused, completed
+  type      String   @default("outreach") // outreach, followup, newsletter
+  followUpNumber Int  @default(0)
+  totalSent    Int    @default(0)
+  totalOpened  Int    @default(0)
+  totalClicked Int    @default(0)
+  totalReplied Int    @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  interactions Interaction[]
+
+  @@map("email_campaigns")
+}
+
+model AutomationTask {
+  id        String   @id @default(cuid())
+  name      String
+  type      String   // google_scrape, email_send, whatsapp_send, data_analysis, report
+  status    String   @default("idle") // idle, running, paused, completed, failed
+  schedule  String?  // cron expression
+  config    Json?
+  lastRunAt DateTime?
+  nextRunAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  taskLogs   TaskLog[]
+
+  @@map("automation_tasks")
+}
+
+model TaskLog {
+  id        String   @id @default(cuid())
+  status    String   // running, success, failed
+  message   String?
+  startedAt DateTime @default(now())
+  completedAt DateTime?
+  metadata  Json?
+
+  taskId   String
+  task     AutomationTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@map("task_logs")
+}
+
+model ApiKey {
+  id         String   @id @default(cuid())
+  name       String
+  key        String   @unique
+  lastUsedAt DateTime?
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime?
+
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("api_keys")
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  action    String
+  entity    String   // customer, campaign, task, user
+  entityId  String?
+  details   Json?
+  createdAt DateTime @default(now())
+
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("activity_logs")
+}
+
+model AiReport {
+  id        String   @id @default(cuid())
+  type      String   // weekly, monthly, custom
+  title     String
+  content   Json?
+  summary   String?
+  periodStart DateTime
+  periodEnd   DateTime
+  createdAt DateTime @default(now())
+
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("ai_reports")
+}
+
+model Quote {
+  id         String   @id @default(cuid())
+  amount     Float?
+  currency   String   @default("USD")
+  status     String   @default("draft") // draft, sent, accepted, rejected
+  content    Json?
+  validUntil DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@map("quotes")
+}
