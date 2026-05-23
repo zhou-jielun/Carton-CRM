@@ -7,6 +7,9 @@ let mainWindow;
 let backendProcess;
 
 function getBackendPath() {
+  if (app.isPackaged) {
+    return path.join(process.resourcesPath, 'backend', 'dist', 'index.js');
+  }
   const devPath = path.join(__dirname, '..', 'backend', 'src', 'index.ts');
   const prodPath = path.join(__dirname, '..', 'backend', 'dist', 'index.js');
   if (fs.existsSync(prodPath)) return prodPath;
@@ -14,6 +17,9 @@ function getBackendPath() {
 }
 
 function getBackendCwd() {
+  if (app.isPackaged) {
+    return path.join(process.resourcesPath, 'backend');
+  }
   return path.join(__dirname, '..', 'backend');
 }
 
@@ -31,6 +37,10 @@ function startBackend() {
       NODE_ENV: 'production',
       PORT: '3001',
     };
+
+    if (app.isPackaged) {
+      env.FRONTEND_DIST_PATH = path.join(__dirname, '..', 'frontend', 'dist');
+    }
 
     if (isDev) {
       backendProcess = fork(require.resolve('tsx'), [backendPath], {

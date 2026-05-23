@@ -28,17 +28,29 @@
     },
     "files": [
       "electron/**/*",
-      "backend/dist/**/*",
-      "backend/.env",
-      "backend/prisma/**/*",
       "frontend/dist/**/*"
     ],
     "extraResources": [
       {
-        "from": "node_modules/.prisma/client/",
-        "to": "prisma-client",
+        "from": "backend/dist",
+        "to": "backend/dist"
+      },
+      {
+        "from": "backend/prisma",
+        "to": "backend/prisma"
+      },
+      {
+        "from": "backend/.env",
+        "to": "backend/.env"
+      },
+      {
+        "from": "node_modules",
+        "to": "backend/node_modules",
         "filter": [
-          "**/*"
+          "**/*",
+          "!carton-crm-backend",
+          "!carton-crm-frontend",
+          "!.package-lock.json"
         ]
       }
     ],

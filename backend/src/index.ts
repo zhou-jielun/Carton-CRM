@@ -57,7 +57,7 @@ app.use(errorHandler);
 
 // Serve frontend static files in production (must be after API routes)
 if (config.nodeEnv === 'production') {
-  const frontendPath = path.join(__dirname, '../../frontend/dist');
+  const frontendPath = process.env.FRONTEND_DIST_PATH || path.join(__dirname, '../../frontend/dist');
   app.use(express.static(frontendPath));
   app.get('*', (_req, res) => {
     res.sendFile(path.join(frontendPath, 'index.html'));
