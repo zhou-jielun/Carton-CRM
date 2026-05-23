@@ -47,6 +47,77 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response, next: Next
   }
 });
 
+// ── Create customer ──
+router.post('/', authenticate, async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const schema = z.object({
+      company: z.string().min(1, '公司名称为必填项'),
+      country: z.string().min(1, '国家/地区为必填项'),
+      industry: z.string().optional(),
+      size: z.string().optional(),
+      website: z.string().optional(),
+      score: z.number().min(0).max(100).optional().default(50),
+      status: z.enum(['lead', 'contacted', 'following', 'quoted', 'won', 'dormant']).optional().default('lead'),
+      customerType: z.enum(['end_user', 'distributor']).optional().nullable(),
+      tags: z.array(z.string()).optional().default([]),
+      source: z.string().optional().nullable(),
+      notes: z.string().optional().nullable(),
+      contactName: z.string().min(1, '联系人姓名为必填项'),
+      contactEmail: z.string().email('邮箱格式不正确'),
+      contactPhone: z.string().optional(),
+      contactWhatsapp: z.string().optional(),
+      contactPosition: z.string().optional(),
+    });
+    const parsed = schema.parse(req.body);
+
+    const customer = await prisma.customer.create({
+      data: {
+        company: parsed.company,
+        country: parsed.country,
+        industry: parsed.industry,
+        size: parsed.size,
+        website: parsed.website,
+        score: parsed.score,
+        status: parsed.status,
+        customerType: parsed.customerType,
+        tags: parsed.tags,
+        source: parsed.source,
+        notes: parsed.notes,
+        userId: req.userId!,
+        contacts: {
+          create: {
+            name: parsed.contactName,
+            email: parsed.contactEmail,
+            phone: parsed.contactPhone || null,
+            whatsapp: parsed.contactWhatsapp || null,
+            position: parsed.contactPosition || null,
+            isPrimary: true,
+          },
+        },
+      },
+      include: { contacts: true },
+    });
+
+    await prisma.activityLog.create({
+      data: {
+        userId: req.userId!,
+        action: 'customer_created',
+        entity: 'customer',
+        entityId: customer.id,
+        details: { company: customer.company },
+      },
+    });
+
+    res.status(201).json({ success: true, customer });
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      res.status(400).json({ success: false, message: err.errors[0].message, errors: err.errors });
+      return;
+    }
+    next(err);
+  }
+});
+
 // ── Export customers (must be before /:id) ──
 router.get('/export', authenticate, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
@@ -165,6 +236,104 @@ router.put('/:id', authenticate, async (req: AuthRequest, res: Response, next: N
       res.status(400).json({ success: false, message: err.errors[0].message });
       return;
     }
+    next(err);
+  }
+});
+
+// ── AI Background Check ──
+router.post('/:id/background-check', authenticate, async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const customer = await prisma.customer.findFirst({
+      where: { id: req.params.id, userId: req.userId! },
+      include: { contacts: true },
+    });
+    if (!customer) throw new AppError('Customer not found', 404);
+
+    // Simulate AI analysis delay
+    const industries = ['纸箱制造', '包装印刷', '瓦楞纸板', '彩印包装', '食品包装'];
+    const positions = ['采购经理', '总经理', '生产总监', '供应链主管', '运营经理'];
+    const names = ['Zhang Wei', 'Liu Yang', 'Chen Ming', 'Wang Fang', 'Li Jun'];
+    const intentLevels = ['高', '中', '低'] as const;
+    const frequencies = ['每季度', '每半年', '每年', '不定期'];
+
+    const industry = customer.industry || industries[Math.floor(Math.random() * industries.length)];
+    const employeeCount = Math.floor(Math.random() * 300) + 20;
+    const founded = `${2000 + Math.floor(Math.random() * 23)}`;
+    const intent = intentLevels[Math.floor(Math.random() * 3)];
+    const freq = frequencies[Math.floor(Math.random() * frequencies.length)];
+
+    const report = {
+      generatedAt: new Date().toISOString(),
+      companyInfo: {
+        name: customer.company || '未知',
+        founded,
+        employees: employeeCount < 50 ? `${employeeCount}` : employeeCount < 200 ? '50-200' : '200+',
+        address: `${customer.country || '未知'} ${['São Paulo', 'Moscow', 'Hanoi', 'Mexico City', 'Madrid'][Math.floor(Math.random() * 5)]}`,
+        website: customer.website || '未提供',
+        industry,
+        registrationNumber: `REG-${Math.floor(Math.random() * 9000000) + 1000000}`,
+      },
+      businessAnalysis: {
+        mainProducts: ['瓦楞纸板生产线', '印刷开槽模切机', '纸箱粘箱机', '自动钉箱机'].slice(0, Math.floor(Math.random() * 3) + 2).join('、'),
+        targetMarkets: `${customer.country || '本地'}及周边地区`,
+        scaleAssessment: employeeCount > 150 ? '中型制造企业，具备完整的纸箱生产流水线' : employeeCount > 50 ? '中小型包装企业，处于设备升级阶段' : '小型加工厂，有设备采购需求',
+        annualRevenue: `$${Math.floor(Math.random() * 9) + 1}M - $${Math.floor(Math.random() * 9) + 10}M`,
+      },
+      decisionMakers: [
+        {
+          name: names[Math.floor(Math.random() * names.length)],
+          position: positions[Math.floor(Math.random() * positions.length)],
+          linkedin: `linkedin.com/in/${Math.random().toString(36).substring(2, 10)}`,
+          contact: customer.contacts[0]?.email || '未获取',
+          influence: '决策者',
+        },
+        {
+          name: names[Math.floor(Math.random() * names.length)],
+          position: positions[Math.floor(Math.random() * positions.length)],
+          linkedin: `linkedin.com/in/${Math.random().toString(36).substring(2, 10)}`,
+          influence: '影响者',
+        },
+      ],
+      procurement: {
+        lastPurchase: `${2023 + Math.floor(Math.random() * 3)}年${Math.floor(Math.random() * 12) + 1}月`,
+        products: '纸箱印刷设备、模切机配件',
+        frequency: freq,
+        estimatedBudget: `$${(Math.floor(Math.random() * 200) + 50)}K - $${(Math.floor(Math.random() * 500) + 500)}K`,
+      },
+      aiAdvice: {
+        intentLevel: intent,
+        intentColor: intent === '高' ? '#34C759' : intent === '中' ? '#FF9500' : '#86868B',
+        followUpAdvice: intent === '高'
+          ? '该客户设备更新需求明确，建议2周内安排线上产品演示，优先发送瓦楞纸板生产线方案'
+          : intent === '中'
+            ? '客户处于市场调研阶段，建议发送公司产品目录和案例，每2周跟进一次'
+            : '保持定期联系，发送行业资讯和展会邀请，建立长期信任关系',
+        entryPoint: intent === '高'
+          ? `建议以"设备升级降本增效"为切入点，强调我司设备${founded === '2010' ? '节能30%以上' : '产能提升40%'}的优势`
+          : '推荐分享行业成功案例，展示我司在全球市场的交付能力',
+        recommendedContactTime: '工作日上午 9:00-11:00（当地时间）',
+      },
+    };
+
+    // Save report
+    const updated = await prisma.customer.update({
+      where: { id: customer.id },
+      data: { backgroundCheck: JSON.stringify(report) },
+      include: { contacts: true },
+    });
+
+    await prisma.activityLog.create({
+      data: {
+        userId: req.userId!,
+        action: 'background_check_completed',
+        entity: 'customer',
+        entityId: customer.id,
+        details: { company: customer.company, intentLevel: intent },
+      },
+    });
+
+    res.json({ success: true, report, customer: updated });
+  } catch (err) {
     next(err);
   }
 });
@@ -361,6 +530,16 @@ router.post('/import', authenticate, upload.single('file'), async (req: AuthRequ
     if (ext === '.json') {
       const raw = JSON.parse(req.file.buffer.toString('utf-8'));
       records = raw.customers || (Array.isArray(raw) ? raw : [raw]);
+      // Also import followups as interactions (backup uses 'followups' key)
+      const followupsByOldId: Record<string, Array<Record<string, unknown>>> = {};
+      if (raw.followups && Array.isArray(raw.followups)) {
+        for (const f of raw.followups) {
+          const cid = f.customerId as string;
+          if (!followupsByOldId[cid]) followupsByOldId[cid] = [];
+          followupsByOldId[cid].push(f);
+        }
+      }
+      (req as unknown as Record<string, unknown>)._followupsMap = followupsByOldId;
     } else if (ext === '.xlsx' || ext === '.xls') {
       const wb = XLSX.read(req.file.buffer, { type: 'buffer' });
       const ws = wb.Sheets[wb.SheetNames[0]];
@@ -371,11 +550,15 @@ router.post('/import', authenticate, upload.single('file'), async (req: AuthRequ
     if (records.length === 0) throw new AppError('文件中没有客户数据', 400);
     if (records.length > 2000) throw new AppError('单次导入最多 2000 条客户', 400);
 
+    // Build oldId->newId map (for followups import from JSON backup)
+    let oldToNewIdMap: Record<string, string> = {};
     let imported = 0;
     let skipped = 0;
+    const followupsMap = (req as unknown as Record<string, unknown>)._followupsMap as Record<string, Array<Record<string, unknown>>> | undefined;
 
     for (const record of records) {
       const data = backupToPrisma(record);
+      const oldId = (record as Record<string, unknown>).id as string | undefined;
 
       // Skip if no meaningful data
       if (!data.company && !data.website && !data.industry && !data.country) {
@@ -384,11 +567,36 @@ router.post('/import', authenticate, upload.single('file'), async (req: AuthRequ
       }
 
       // Deduplicate: skip if same company exists for this user
+      let customerId: string;
       if (data.company) {
         const existing = await prisma.customer.findFirst({
           where: { userId: req.userId!, company: data.company },
         });
         if (existing) {
+          // Still track old->new ID for followup import
+          if (oldId) oldToNewIdMap[oldId] = existing.id;
+          // Import followups for existing customer too
+          if (followupsMap && oldId && followupsMap[oldId]) {
+            const fu = followupsMap[oldId];
+            const fuToCreate = fu
+              .filter(f => (f.content as string) || '')
+              .map(f => {
+                let c = (f.content as string) || '';
+                if (f.method) c = `【${f.method}】${c}`;
+                if (f.nextAction) c += `\n后续动作: ${f.nextAction}`;
+                return {
+                  type: 'note' as const,
+                  direction: 'inbound' as const,
+                  status: 'sent' as const,
+                  content: c,
+                  sentAt: f.date ? new Date(f.date as string) : new Date(),
+                  customerId: existing.id,
+                };
+              });
+            if (fuToCreate.length > 0) {
+              await prisma.interaction.createMany({ data: fuToCreate.slice(0, 100) });
+            }
+          }
           skipped++;
           continue;
         }
@@ -410,12 +618,35 @@ router.post('/import', authenticate, upload.single('file'), async (req: AuthRequ
           contacts: data.contacts,
         },
       });
+      customerId = created.id;
+
+      // Track old->new ID mapping for followups import
+      if (oldId) oldToNewIdMap[oldId] = created.id;
 
       // Build interactions from structured backup fields
       const interactionsToCreate: Array<{
         type: string; direction: string; status: string;
         content: string; sentAt: Date; customerId: string;
       }> = [];
+
+      // 0. From followups array (JSON backup uses 'followups' key, matched by old customerId)
+      if (followupsMap && oldId && followupsMap[oldId]) {
+        for (const f of followupsMap[oldId]) {
+          const content = (f.content as string) || '';
+          if (!content) continue;
+          let followupContent = content;
+          if (f.method) followupContent = `【${f.method}】${followupContent}`;
+          if (f.nextAction) followupContent += `\n后续动作: ${f.nextAction}`;
+          interactionsToCreate.push({
+            type: 'note',
+            direction: 'inbound',
+            status: 'sent',
+            content: followupContent,
+            sentAt: f.date ? new Date(f.date as string) : new Date(),
+            customerId: customerId,
+          });
+        }
+      }
 
       // 1. From explicit interactions array (if present in JSON)
       if (record.interactions && Array.isArray(record.interactions)) {
@@ -427,7 +658,7 @@ router.post('/import', authenticate, upload.single('file'), async (req: AuthRequ
               status: 'sent',
               content: i.content || '',
               sentAt: i.sentAt ? new Date(i.sentAt) : new Date(),
-              customerId: created.id,
+              customerId: customerId,
             });
           }
         }
@@ -443,7 +674,7 @@ router.post('/import', authenticate, upload.single('file'), async (req: AuthRequ
           type: 'note', direction: 'inbound', status: 'sent',
           content: contactContent,
           sentAt: new Date(fcDate),
-          customerId: created.id,
+          customerId: customerId,
         });
       }
 
@@ -453,7 +684,7 @@ router.post('/import', authenticate, upload.single('file'), async (req: AuthRequ
           type: 'note', direction: 'inbound', status: 'sent',
           content: `【客户痛点】\n${record.corePainPoints}`,
           sentAt: record.nextFollowUp ? new Date(record.nextFollowUp) : new Date(),
-          customerId: created.id,
+          customerId: customerId,
         });
       }
 
@@ -464,7 +695,7 @@ router.post('/import', authenticate, upload.single('file'), async (req: AuthRequ
           type: 'note', direction: 'inbound', status: 'sent',
           content: `【产能与设备】\n${prodInfo}`,
           sentAt: new Date(),
-          customerId: created.id,
+          customerId: customerId,
         });
       }
 
@@ -474,7 +705,7 @@ router.post('/import', authenticate, upload.single('file'), async (req: AuthRequ
           type: 'note', direction: 'inbound', status: 'sent',
           content: `【目标行业】\n${record.mainIndustries}`,
           sentAt: new Date(),
-          customerId: created.id,
+          customerId: customerId,
         });
       }
 
@@ -485,7 +716,7 @@ router.post('/import', authenticate, upload.single('file'), async (req: AuthRequ
           type: 'note', direction: 'inbound', status: 'sent',
           content: `【采购计划】\n${purchaseInfo}`,
           sentAt: new Date(),
-          customerId: created.id,
+          customerId: customerId,
         });
       }
 
