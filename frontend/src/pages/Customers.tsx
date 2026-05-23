@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ImportDialog from '@/components/ImportDialog';
+import AddCustomerModal from '@/components/AddCustomerModal';
 import { useToast } from '@/contexts/ToastContext';
 import {
   Users,
@@ -20,6 +21,8 @@ import {
   MoreHorizontal,
   Upload,
   X,
+  Sparkles,
+  SearchCheck,
 } from 'lucide-react';
 import { timeAgo } from '@/lib/utils';
 import { getCountryFlag } from '@/lib/countryFlags';
@@ -40,6 +43,7 @@ interface Customer {
   score: number;
   status: string;
   source?: string;
+  customerType?: string;
   tags: string[];
   createdAt: string;
   contacts: Array<{ email?: string; phone?: string; whatsapp?: string }>;
@@ -73,6 +77,16 @@ const statusChipStyles: Record<string, { bg: string; color: string }> = {
   dormant: { bg: '#FBE9E7', color: '#BF360C' },
 };
 
+const customerTypeLabels: Record<string, string> = {
+  end_user: '终端客户',
+  distributor: '经销商',
+};
+
+const customerTypeStyles: Record<string, { bg: string; color: string }> = {
+  end_user: { bg: '#FCE4EC', color: '#C62828' },
+  distributor: { bg: '#EDE7F6', color: '#4527A0' },
+};
+
 export default function CustomersPage() {
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -89,6 +103,9 @@ export default function CustomersPage() {
   const [filterStatus, setFilterStatus] = useState('');
   const [moreActionsOpen, setMoreActionsOpen] = useState(false);
   const moreActionsRef = useRef<HTMLDivElement>(null);
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [editingCustomer, setEditingCustomer] = useState<any>(null);
+  const [bgCheckLoading, setBgCheckLoading] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadCustomers();
@@ -194,6 +211,37 @@ export default function CustomersPage() {
     setFilterStatus(status);
   };
 
+  const handleAddSuccess = (customerId: string, company: string) => {
+    loadCustomers(search);
+    toast('success', `客户"${company}"创建成功`);
+    setTimeout(() => navigate(`/customers/${customerId}`), 1500);
+  };
+
+  const handleBgCheck = async (e: React.MouseEvent, customerId: string, company: string) => {
+    e.stopPropagation();
+    setBgCheckLoading((prev) => new Set(prev).add(customerId));
+    try {
+      const res = await fetch(`/api/customers/${customerId}/background-check`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast('success', `"${company}" AI背调完成`);
+      } else {
+        toast('error', data.message || '背调暂时失败，请稍后重试');
+      }
+    } catch {
+      toast('error', '背调暂时失败，请稍后重试');
+    } finally {
+      setBgCheckLoading((prev) => {
+        const next = new Set(prev);
+        next.delete(customerId);
+        return next;
+      });
+    }
+  };
+
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
@@ -241,7 +289,7 @@ export default function CustomersPage() {
           <div className="w-px h-5 bg-[#E5E5EA] mx-0.5" />
 
           <button
-            onClick={() => toast('info', '添加客户功能开发中')}
+            onClick={() => setAddModalOpen(true)}
             className="inline-flex items-center gap-2 text-body font-medium text-apple-blue hover:opacity-80 transition-opacity px-2 py-1.5"
           >
             <Plus className="w-4 h-4" />
@@ -433,6 +481,17 @@ export default function CustomersPage() {
                         >
                           {statusLabels[customer.status] || customer.status}
                         </span>
+                        {customer.customerType && customerTypeLabels[customer.customerType] && (
+                          <span
+                            className="inline-flex items-center px-2 py-0.5 text-[11px] font-medium leading-none rounded-[4px]"
+                            style={{
+                              backgroundColor: customerTypeStyles[customer.customerType]?.bg || '#F5F5F7',
+                              color: customerTypeStyles[customer.customerType]?.color || '#86868B',
+                            }}
+                          >
+                            {customerTypeLabels[customer.customerType]}
+                          </span>
+                        )}
                         {customer.source === 'google_search' && (
                           <span
                             className="inline-flex items-center px-2 py-0.5 text-[11px] font-medium leading-none rounded-[4px]"
@@ -487,8 +546,24 @@ export default function CustomersPage() {
                       )}
                     </div>
 
-                    {/* Chevron */}
-                    <ChevronRight className="w-4 h-4 flex-shrink-0 text-apple-tetriary group-hover:text-apple-blue transition-colors duration-300 ml-2" />
+                    {/* Chevron + Background Check */}
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      {customer.company && (
+                        <button
+                          onClick={(e) => handleBgCheck(e, customer.id, customer.company || '')}
+                          disabled={bgCheckLoading.has(customer.id)}
+                          className="opacity-0 group-hover:opacity-100 transition-all duration-300 inline-flex items-center gap-1 text-[13px] font-medium text-apple-blue hover:text-[#0066CC] px-2 py-1 rounded-[6px] hover:bg-[#E3F2FD] disabled:opacity-50"
+                        >
+                          {bgCheckLoading.has(customer.id) ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <SearchCheck className="w-3.5 h-3.5" />
+                          )}
+                          背调
+                        </button>
+                      )}
+                      <ChevronRight className="w-4 h-4 flex-shrink-0 text-apple-tetriary group-hover:text-apple-blue transition-colors duration-300" />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -565,6 +640,12 @@ export default function CustomersPage() {
       )}
 
       <ImportDialog open={importOpen} onClose={handleImportComplete} />
+      <AddCustomerModal
+        open={addModalOpen}
+        onClose={() => { setAddModalOpen(false); setEditingCustomer(null); }}
+        onSuccess={handleAddSuccess}
+        customer={editingCustomer}
+      />
     </div>
   );
 }

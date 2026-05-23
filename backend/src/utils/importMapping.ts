@@ -99,6 +99,7 @@ export function backupToPrisma(record: BackupCustomer) {
     size: record.companySize || '',
     score: record.priority ? (priorityScore[record.priority.toUpperCase()] ?? 0) : 0,
     status: stageEn,
+    customerType: (record.customerType as string) || null,
     tags: record.tags || [],
     source: record.source || 'manual_import',
     notes: Object.keys(notes).length > 0 ? JSON.stringify(notes) : null,
@@ -123,6 +124,7 @@ export function prismaToBackup(customer: {
   size: string | null;
   score: number;
   status: string;
+  customerType: string | null;
   tags: string[];
   source: string | null;
   notes: string | null;
@@ -159,6 +161,7 @@ export function prismaToBackup(customer: {
     needsFactoryInspection: (notes.needsFactoryInspection as boolean) || false,
     stage: reverseStageMap[customer.status] || customer.status,
     priority: customer.score >= 80 ? 'A' : customer.score >= 45 ? 'B' : 'C',
+    customerType: customer.customerType || '',
     nextFollowUp: (notes.nextFollowUp as string) || '',
     tags: customer.tags || [],
     createdAt: customer.createdAt.toISOString(),

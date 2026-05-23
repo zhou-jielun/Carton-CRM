@@ -611,6 +611,7 @@ router.post('/import', authenticate, upload.single('file'), async (req: AuthRequ
           size: data.size,
           score: data.score,
           status: data.status,
+          customerType: data.customerType,
           tags: data.tags,
           source: data.source,
           notes: data.notes,
