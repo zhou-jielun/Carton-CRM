@@ -37,6 +37,8 @@ function startBackend() {
       NODE_ENV: 'production',
       PORT: '3001',
     };
+    // Node.js v24 rejects --use-system-ca in NODE_OPTIONS
+    delete env.NODE_OPTIONS;
 
     if (app.isPackaged) {
       env.FRONTEND_DIST_PATH = path.join(__dirname, '..', 'frontend', 'dist');
