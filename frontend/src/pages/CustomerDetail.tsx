@@ -207,6 +207,16 @@ export default function CustomerDetailPage() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't navigate when user is typing in an input/textarea/contentEditable
+      const target = e.target as HTMLElement;
+      const isEditing = target.tagName === 'TEXTAREA' ||
+                        target.tagName === 'INPUT' ||
+                        target.tagName === 'SELECT' ||
+                        target.isContentEditable;
+      if (isEditing) return;
+      // Don't navigate when Ctrl/Meta is held (e.g. Ctrl+Arrow for word jump)
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+
       if (e.key === 'ArrowRight') navigateToNext();
       if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') navigateToPrev();
     };
