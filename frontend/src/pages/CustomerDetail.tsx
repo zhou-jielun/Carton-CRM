@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/contexts/ToastContext';
+import AddCustomerModal from '@/components/AddCustomerModal';
 import {
   ArrowLeft,
   Loader2,
@@ -26,6 +27,13 @@ import {
   Users,
   FileText,
   X,
+  SearchCheck,
+  Download,
+  Globe,
+  TrendingUp,
+  Target,
+  ShoppingCart,
+  Lightbulb,
 } from 'lucide-react';
 import { timeAgo } from '@/lib/utils';
 import { getCountryFlag } from '@/lib/countryFlags';
@@ -183,7 +191,11 @@ export default function CustomerDetailPage() {
   const [editingInteractionId, setEditingInteractionId] = useState<string | null>(null);
   // Background check
   const [backgroundCheck, setBackgroundCheck] = useState('');
-  const [editingBackgroundCheck, setEditingBackgroundCheck] = useState(false);
+  const [bgCheckRunning, setBgCheckRunning] = useState(false);
+  // Tabs
+  const [activeTab, setActiveTab] = useState<'detail' | 'interactions' | 'background'>('detail');
+  // Edit modal
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
   useEffect(() => {
     loadCustomer();
@@ -208,7 +220,6 @@ export default function CustomerDetailPage() {
     setEditingInteractionId(null);
     setInteractionContent('');
     setBackgroundCheck('');
-    setEditingBackgroundCheck(false);
     try {
       const res = await fetch(`/api/customers/${id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
@@ -332,6 +343,43 @@ export default function CustomerDetailPage() {
     }
   };
 
+  const handleBgCheck = async () => {
+    if (!customer) return;
+    setBgCheckRunning(true);
+    setActiveTab('background');
+    toast('info', 'AI正在为您生成客户背调报告...');
+    try {
+      const res = await fetch(`/api/customers/${customer.id}/background-check`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      });
+      const data = await res.json();
+      if (data.success) {
+        setCustomer((prev) => prev ? { ...prev, backgroundCheck: JSON.stringify(data.report) } : null);
+        setBackgroundCheck(JSON.stringify(data.report));
+        toast('success', `"${customer.company}" AI背调完成`);
+        if (data.report?.decisionMakers?.length) {
+          toast('info', `已为您识别 ${data.report.decisionMakers.length} 位决策人信息`);
+        }
+      } else {
+        toast('error', data.message || '背调暂时失败，请稍后重试');
+      }
+    } catch {
+      toast('error', '背调暂时失败，请稍后重试');
+    } finally {
+      setBgCheckRunning(false);
+    }
+  };
+
+  const parseBackgroundReport = () => {
+    if (!backgroundCheck) return null;
+    try {
+      return JSON.parse(backgroundCheck);
+    } catch {
+      return null;
+    }
+  };
+
   const addInteraction = async () => {
     if (!interactionContent.trim() || !customer) return;
     setAddingInteractionLoading(true);
@@ -432,11 +480,6 @@ export default function CustomerDetailPage() {
     } catch {
       toast('error', '删除失败');
     }
-  };
-
-  const saveBackgroundCheck = async () => {
-    await updateCustomer({ backgroundCheck });
-    setEditingBackgroundCheck(false);
   };
 
   if (loading) {
@@ -577,7 +620,27 @@ export default function CustomerDetailPage() {
 
             {/* Quick actions + Delete */}
             <div className="flex flex-col items-end gap-2 flex-shrink-0">
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 flex-wrap justify-end">
+                <button
+                  onClick={() => setEditModalOpen(true)}
+                  className="inline-flex items-center gap-2 text-caption font-medium text-apple-blue hover:bg-[#E3F2FD] px-2.5 py-1.5 rounded-[6px] transition-colors duration-300"
+                >
+                  <Edit3 className="w-3.5 h-3.5" />
+                  编辑
+                </button>
+                <button
+                  onClick={handleBgCheck}
+                  disabled={bgCheckRunning}
+                  className="inline-flex items-center gap-2 text-caption font-medium text-white bg-apple-blue hover:bg-[#0066CC] disabled:opacity-50 px-3 py-1.5 rounded-[8px] transition-all duration-300 shadow-sm"
+                >
+                  {bgCheckRunning ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <SearchCheck className="w-3.5 h-3.5" />
+                  )}
+                  AI背调
+                </button>
+                <div className="w-px h-5 bg-apple-border mx-1" />
                 <button
                   onClick={() => {
                     const email = customer.contacts[0]?.email;
@@ -603,6 +666,7 @@ export default function CustomerDetailPage() {
                 <button
                   onClick={() => {
                     setAddingInteraction(true);
+                    setActiveTab('interactions');
                     setTimeout(() => interactionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
                   }}
                   className="inline-flex items-center gap-2 text-caption font-medium text-apple-blue hover:bg-[#E3F2FD] px-2.5 py-1.5 rounded-[6px] transition-colors duration-300"
@@ -625,138 +689,415 @@ export default function CustomerDetailPage() {
         </CardContent>
       </Card>
 
-      {/* ── Main grid ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5 lg:gap-6 xl:gap-8">
-        {/* ── Left column ── */}
-        <div className="lg:col-span-8 space-y-4 md:space-y-5 lg:space-y-6 flex flex-col">
-          {/* Status segmented control */}
-          <Card>
-            <CardHeader>
-              <h2 className="text-subheading font-medium text-apple-black">客户阶段</h2>
-            </CardHeader>
-            <CardContent>
-              <div
-                className="flex flex-wrap gap-1 p-1 rounded-[10px] bg-apple-surface"
-              >
-                {Object.entries(statusLabels).map(([key, label]) => {
-                  const isSelected = customer.status === key;
-                  return (
-                    <button
-                      key={key}
-                      onClick={() => changeStatus(key)}
-                      disabled={saving}
-                      className={`px-3 py-1.5 rounded-[8px] text-caption font-medium transition-all duration-300 ${
-                        isSelected
-                          ? 'bg-white shadow-[0_1px_3px_rgba(0,0,0,0.04)]'
-                          : 'hover:text-[#1D1D1F]'
-                      }`}
-                      style={{
-                        color: isSelected ? '#1D1D1F' : '#86868B',
-                        fontWeight: 500,
-                      }}
-                    >
-                      {label}
-                    </button>
-                  );
-                })}
-              </div>
-              <div className="border-t border-apple-border/30 pt-4 mt-4">
-                <h3 className="text-caption font-medium text-apple-secondary mb-2">客户类型</h3>
-                <div className="flex gap-2 flex-wrap">
-                  {customerTypeOptions.map((opt) => (
-                    <button
-                      key={opt.value}
-                      onClick={() => changeCustomerType(opt.value)}
-                      disabled={saving}
-                      className={`px-4 py-1.5 rounded-full text-caption font-medium transition-all duration-300 flex items-center gap-1.5 ${
-                        customer.customerType === opt.value
-                          ? 'bg-apple-blue text-white shadow-sm'
-                          : 'bg-[#F5F5F7] text-apple-secondary hover:bg-[#E8E8ED]'
-                      }`}
-                    >
-                      {opt.value === 'end_user' ? <UserCheck className="w-3.5 h-3.5" /> : <Users className="w-3.5 h-3.5" />}
-                      {opt.label}
-                    </button>
-                  ))}
-                  {customer.customerType && (
-                    <button
-                      onClick={() => changeCustomerType(null)}
-                      className="px-3 py-1.5 rounded-full text-caption text-apple-secondary hover:bg-[#F5F5F7] transition-all duration-300"
-                    >
-                      清除
-                    </button>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+      {/* ── Tab Navigation ── */}
+      <div className="flex items-center gap-1 p-1 rounded-[12px] bg-apple-surface">
+        <button
+          onClick={() => setActiveTab('detail')}
+          className={`px-4 py-2 rounded-[10px] text-body font-medium transition-all duration-300 ${
+            activeTab === 'detail'
+              ? 'bg-white text-apple-black shadow-[0_1px_3px_rgba(0,0,0,0.06)]'
+              : 'text-apple-secondary hover:text-apple-black'
+          }`}
+        >
+          客户详情
+        </button>
+        <button
+          onClick={() => setActiveTab('interactions')}
+          className={`px-4 py-2 rounded-[10px] text-body font-medium transition-all duration-300 ${
+            activeTab === 'interactions'
+              ? 'bg-white text-apple-black shadow-[0_1px_3px_rgba(0,0,0,0.06)]'
+              : 'text-apple-secondary hover:text-apple-black'
+          }`}
+        >
+          跟进记录
+          {customer.interactions.length > 0 && (
+            <span className="ml-1.5 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-medium bg-[#E8E8ED] text-apple-secondary">
+              {customer.interactions.length}
+            </span>
+          )}
+        </button>
+        <button
+          onClick={() => setActiveTab('background')}
+          className={`px-4 py-2 rounded-[10px] text-body font-medium transition-all duration-300 flex items-center gap-1.5 ${
+            activeTab === 'background'
+              ? 'bg-white text-apple-black shadow-[0_1px_3px_rgba(0,0,0,0.06)]'
+              : 'text-apple-secondary hover:text-apple-black'
+          }`}
+        >
+          AI背调
+          {bgCheckRunning ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin text-apple-blue" />
+          ) : backgroundCheck ? (
+            <span className="w-2 h-2 rounded-full bg-apple-green" />
+          ) : null}
+        </button>
+      </div>
 
-          {/* Contacts */}
-          <Card>
-            <CardHeader>
-              <h2 className="text-subheading font-medium text-apple-black">联系人</h2>
-            </CardHeader>
-            <CardContent>
-              {customer.contacts.length === 0 ? (
-                <p className="text-caption text-apple-secondary">暂无联系人</p>
-              ) : (
-                <div className="space-y-3">
-                  {customer.contacts.map((contact) => (
-                    <div key={contact.id} className="flex items-center gap-4 p-3 rounded-[10px] bg-[#F5F5F7]">
-                      {/* Avatar */}
-                      <div
-                        className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-[16px] font-semibold"
-                        style={{ backgroundColor: '#E3F2FD', color: '#1976D2' }}
+      {/* ═══════════════════════════════════════════ */}
+      {/* ── Tab: 客户详情 ── */}
+      {/* ═══════════════════════════════════════════ */}
+      {activeTab === 'detail' && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5 lg:gap-6 xl:gap-8">
+          {/* ── Left column ── */}
+          <div className="lg:col-span-8 space-y-4 md:space-y-5 lg:space-y-6 flex flex-col">
+            {/* Status segmented control */}
+            <Card>
+              <CardHeader>
+                <h2 className="text-subheading font-medium text-apple-black">客户阶段</h2>
+              </CardHeader>
+              <CardContent>
+                <div
+                  className="flex flex-wrap gap-1 p-1 rounded-[10px] bg-apple-surface"
+                >
+                  {Object.entries(statusLabels).map(([key, label]) => {
+                    const isSelected = customer.status === key;
+                    return (
+                      <button
+                        key={key}
+                        onClick={() => changeStatus(key)}
+                        disabled={saving}
+                        className={`px-3 py-1.5 rounded-[8px] text-caption font-medium transition-all duration-300 ${
+                          isSelected
+                            ? 'bg-white shadow-[0_1px_3px_rgba(0,0,0,0.04)]'
+                            : 'hover:text-[#1D1D1F]'
+                        }`}
+                        style={{
+                          color: isSelected ? '#1D1D1F' : '#86868B',
+                          fontWeight: 500,
+                        }}
                       >
-                        {(contact.name || '?')[0]}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="text-body font-medium text-apple-black">
-                            {contact.name || '未知'}
-                          </span>
-                          {contact.isPrimary && (
-                            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-apple-blue/10 text-apple-blue">
-                              主要
-                            </span>
-                          )}
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="border-t border-apple-border/30 pt-4 mt-4">
+                  <h3 className="text-caption font-medium text-apple-secondary mb-2">客户类型</h3>
+                  <div className="flex gap-2 flex-wrap">
+                    {customerTypeOptions.map((opt) => (
+                      <button
+                        key={opt.value}
+                        onClick={() => changeCustomerType(opt.value)}
+                        disabled={saving}
+                        className={`px-4 py-1.5 rounded-full text-caption font-medium transition-all duration-300 flex items-center gap-1.5 ${
+                          customer.customerType === opt.value
+                            ? 'bg-apple-blue text-white shadow-sm'
+                            : 'bg-[#F5F5F7] text-apple-secondary hover:bg-[#E8E8ED]'
+                        }`}
+                      >
+                        {opt.value === 'end_user' ? <UserCheck className="w-3.5 h-3.5" /> : <Users className="w-3.5 h-3.5" />}
+                        {opt.label}
+                      </button>
+                    ))}
+                    {customer.customerType && (
+                      <button
+                        onClick={() => changeCustomerType(null)}
+                        className="px-3 py-1.5 rounded-full text-caption text-apple-secondary hover:bg-[#F5F5F7] transition-all duration-300"
+                      >
+                        清除
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Contacts */}
+            <Card>
+              <CardHeader>
+                <h2 className="text-subheading font-medium text-apple-black">联系人</h2>
+              </CardHeader>
+              <CardContent>
+                {customer.contacts.length === 0 ? (
+                  <p className="text-caption text-apple-secondary">暂无联系人</p>
+                ) : (
+                  <div className="space-y-3">
+                    {customer.contacts.map((contact) => (
+                      <div key={contact.id} className="flex items-center gap-4 p-3 rounded-[10px] bg-[#F5F5F7]">
+                        {/* Avatar */}
+                        <div
+                          className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-[16px] font-semibold"
+                          style={{ backgroundColor: '#E3F2FD', color: '#1976D2' }}
+                        >
+                          {(contact.name || '?')[0]}
                         </div>
-                        {(contact.position || contact.email || contact.phone || contact.whatsapp) && (
-                          <div className="flex items-center gap-3 mt-0.5 flex-wrap text-caption text-apple-secondary">
-                            {contact.position && <span>{contact.position}</span>}
-                            {contact.email && (
-                              <a href={`mailto:${contact.email}`} className="flex items-center gap-1 text-apple-blue hover:underline">
-                                <Mail className="w-3 h-3" />{contact.email}
-                              </a>
-                            )}
-                            {contact.phone && (
-                              <a href={`tel:${contact.phone}`} className="flex items-center gap-1 text-apple-blue hover:underline">
-                                <Phone className="w-3 h-3" />{contact.phone}
-                              </a>
-                            )}
-                            {contact.whatsapp && (
-                              <span className="flex items-center gap-1" style={{ color: '#34C759' }}>
-                                <MessageSquare className="w-3 h-3" />{contact.whatsapp}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-body font-medium text-apple-black">
+                              {contact.name || '未知'}
+                            </span>
+                            {contact.isPrimary && (
+                              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-apple-blue/10 text-apple-blue">
+                                主要
                               </span>
                             )}
                           </div>
+                          {(contact.position || contact.email || contact.phone || contact.whatsapp) && (
+                            <div className="flex items-center gap-3 mt-0.5 flex-wrap text-caption text-apple-secondary">
+                              {contact.position && <span>{contact.position}</span>}
+                              {contact.email && (
+                                <a href={`mailto:${contact.email}`} className="flex items-center gap-1 text-apple-blue hover:underline">
+                                  <Mail className="w-3 h-3" />{contact.email}
+                                </a>
+                              )}
+                              {contact.phone && (
+                                <a href={`tel:${contact.phone}`} className="flex items-center gap-1 text-apple-blue hover:underline">
+                                  <Phone className="w-3 h-3" />{contact.phone}
+                                </a>
+                              )}
+                              {contact.whatsapp && (
+                                <span className="flex items-center gap-1" style={{ color: '#34C759' }}>
+                                  <MessageSquare className="w-3 h-3" />{contact.whatsapp}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Interactions (compact in detail tab) */}
+            <Card className="rounded-[12px] flex-1 flex flex-col">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-subheading font-medium text-apple-black">最近跟进</h2>
+                  <button
+                    onClick={() => setActiveTab('interactions')}
+                    className="text-caption font-medium text-apple-blue hover:bg-[#E3F2FD] px-2.5 py-1.5 rounded-[6px] transition-colors duration-300"
+                  >
+                    查看全部
+                  </button>
+                </div>
+              </CardHeader>
+              <CardContent className="flex-1">
+                {customer.interactions.length === 0 && !customer.notes ? (
+                  <div className="text-center py-8">
+                    <p className="text-caption text-apple-secondary mb-3">暂无跟进记录</p>
+                    <button
+                      onClick={() => { setAddingInteraction(true); setActiveTab('interactions'); }}
+                      className="inline-flex items-center gap-1.5 text-caption font-medium text-apple-blue hover:bg-[#E3F2FD] px-3 py-1.5 rounded-[6px] transition-colors duration-300"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      添加第一条跟进
+                    </button>
+                  </div>
+                ) : (
+                  <div className="divide-y" style={{ borderColor: '#E5E5EA' }}>
+                    {/* show max 5 recent interactions */}
+                    {customer.interactions.slice(0, 5).map((interaction, idx) => (
+                      <div
+                        key={interaction.id}
+                        className={`${idx === 0 ? 'pb-3' : 'py-3'} ${idx === Math.min(customer.interactions.length, 5) - 1 ? 'pb-0' : ''}`}
+                      >
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-[11px] font-medium px-1.5 py-0.5 rounded-full"
+                            style={{
+                              backgroundColor: interaction.direction === 'outbound' ? '#E3F2FD' : '#F5F5F7',
+                              color: interaction.direction === 'outbound' ? '#1976D2' : '#86868B',
+                            }}
+                          >
+                            {interaction.direction === 'outbound' ? '我方发出' : '客户反馈'}
+                          </span>
+                          <span className="text-caption font-medium text-apple-black">
+                            {interactionTypeLabels[interaction.type] || interaction.type}
+                          </span>
+                          <span className="text-caption text-apple-secondary ml-auto flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {timeAgo(interaction.sentAt)}
+                          </span>
+                        </div>
+                        {interaction.content && (
+                          <p className="text-body mt-1 whitespace-pre-wrap leading-relaxed text-apple-black line-clamp-2">
+                            {interaction.content}
+                          </p>
                         )}
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                    ))}
+                    {customer.interactions.length > 5 && (
+                      <div className="pt-3 text-center">
+                        <button
+                          onClick={() => setActiveTab('interactions')}
+                          className="text-caption font-medium text-apple-blue hover:underline"
+                        >
+                          查看全部 {customer.interactions.length} 条跟进
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
 
-          {/* Interactions */}
-          <Card
-            ref={interactionRef}
-            className="rounded-[12px] bg-apple-hover flex-1 flex flex-col"
-          >
+          {/* ── Right column ── */}
+          <div className="lg:col-span-4 lg:sticky lg:top-6 self-start space-y-4 md:space-y-5 lg:space-y-6">
+            {/* Details card */}
+            <Card>
+              <CardHeader>
+                <h2 className="text-subheading font-medium text-apple-black">客户详情</h2>
+              </CardHeader>
+              <CardContent className="space-y-0">
+                {/* Score — visual centerpiece */}
+                <div className="flex flex-col items-center py-4 border-b border-apple-border">
+                  <CircularScore score={customer.score} grade={grade.grade} color={grade.color} />
+                  <span className="text-caption mt-1.5 font-medium" style={{ color: grade.color }}>
+                    {grade.label}
+                  </span>
+                </div>
+
+                {/* Source */}
+                <div className="flex items-center justify-between py-3 border-b border-apple-border">
+                  <span className="text-body text-apple-secondary">来源</span>
+                  <div className="flex items-center gap-2">
+                    {editingSource ? (
+                      <>
+                        <select
+                          value={selectedSource}
+                          onChange={(e) => setSelectedSource(e.target.value)}
+                          className="h-8 px-2 rounded-[8px] border border-apple-border/50 bg-white text-caption text-apple-black focus:outline-none focus:border-apple-blue"
+                        >
+                          <option value="">选择来源</option>
+                          {sourceOptions.map((opt) => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          ))}
+                        </select>
+                        <button onClick={changeSource} className="text-caption font-medium text-apple-blue hover:bg-[#E3F2FD] px-2 py-1 rounded-[4px]">保存</button>
+                        <button onClick={() => { setEditingSource(false); setSelectedSource(customer.source || ''); }} className="text-caption text-apple-secondary hover:bg-[#F5F5F7] px-2 py-1 rounded-[4px]">取消</button>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-body font-medium text-apple-black">
+                          {sourceLabels[customer.source || ''] || customer.source || '未设置'}
+                        </span>
+                        <button onClick={() => setEditingSource(true)} className="text-apple-secondary hover:text-apple-black transition-colors duration-300 p-1">
+                          <FileText className="w-3.5 h-3.5" />
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Next follow-up */}
+                <div className="flex items-center justify-between py-3 border-b border-apple-border">
+                  <span className="text-body text-apple-secondary">下次跟进</span>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-apple-secondary" />
+                    <input
+                      type="date"
+                      value={nextFollowUpDate}
+                      onChange={(e) => setNextFollowUpDate(e.target.value)}
+                      className="h-8 px-2 rounded-[8px] border border-apple-border/50 bg-white text-caption text-apple-black focus:outline-none focus:border-apple-blue transition-colors duration-300"
+                      style={{ width: '140px' }}
+                    />
+                  </div>
+                </div>
+                {showOverdueFollowUp && (
+                  <div className="flex items-center gap-1.5 pt-2 pb-1 text-caption text-apple-red">
+                    <Clock className="w-3 h-3" />
+                    计划跟进：{formatDate(customer.nextFollowUp)} (已逾期)
+                  </div>
+                )}
+                {!showOverdueFollowUp && customer.nextFollowUp && (
+                  <div className="flex items-center gap-1.5 pt-2 pb-1 text-caption text-apple-blue">
+                    <Clock className="w-3 h-3" />
+                    计划跟进：{formatDate(customer.nextFollowUp)}
+                  </div>
+                )}
+                {hasFollowUpChange && (
+                  <div className="pt-2 pb-1">
+                    <Button variant="primary" size="sm" onClick={saveNextFollowUp} disabled={saving} className="w-full text-caption h-8">
+                      保存日期
+                    </Button>
+                  </div>
+                )}
+
+                {/* Tags */}
+                <div className="py-3 border-b border-apple-border">
+                  <span className="text-body text-apple-secondary block mb-2">标签</span>
+                  <div className="flex flex-wrap gap-1.5 mb-3">
+                    {customer.tags.length === 0 ? (
+                      <p className="text-caption text-apple-secondary">暂无标签</p>
+                    ) : (
+                      customer.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-caption transition-colors duration-300"
+                          style={{ backgroundColor: '#F5F5F7', color: '#86868B' }}
+                        >
+                          {tag}
+                          <button onClick={() => removeTag(tag)} className="hover:text-apple-red transition-colors duration-300 leading-none">
+                            <X className="w-3 h-3" />
+                          </button>
+                        </span>
+                      ))
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="添加标签..."
+                      value={newTag}
+                      onChange={(e) => setNewTag(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && addTag()}
+                      className="text-caption h-8"
+                    />
+                    <Button variant="secondary" size="sm" onClick={addTag} className="shrink-0">
+                      <TagIcon className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* AI背调 shortcut */}
+                <div className="py-3">
+                  <button
+                    onClick={() => setActiveTab('background')}
+                    className="w-full flex items-center gap-3 p-3 rounded-[10px] bg-[#F5F5F7] hover:bg-[#EBEBF0] transition-colors duration-300 group"
+                  >
+                    <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+                      style={{ backgroundColor: backgroundCheck ? '#E8F5E9' : '#E3F2FD' }}
+                    >
+                      {backgroundCheck ? (
+                        <SearchCheck className="w-4 h-4 text-apple-green" />
+                      ) : (
+                        <SearchCheck className="w-4 h-4 text-apple-blue" />
+                      )}
+                    </div>
+                    <div className="text-left flex-1 min-w-0">
+                      <p className="text-body font-medium text-apple-black">
+                        {backgroundCheck ? 'AI背调报告已完成' : 'AI客户背调'}
+                      </p>
+                      <p className="text-caption text-apple-secondary mt-0.5">
+                        {backgroundCheck ? '点击查看完整报告' : '一键分析客户采购潜力'}
+                      </p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-apple-tetriary group-hover:text-apple-black transition-colors duration-300" />
+                  </button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════ */}
+      {/* ── Tab: 跟进记录 ── */}
+      {/* ═══════════════════════════════════════════ */}
+      {activeTab === 'interactions' && (
+        <div className="max-w-4xl mx-auto space-y-4 md:space-y-5 lg:space-y-6">
+          <Card ref={interactionRef} className="rounded-[12px]">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <h2 className="text-subheading font-medium text-apple-black">跟进记录</h2>
+                <h2 className="text-subheading font-medium text-apple-black">
+                  跟进记录
+                  {customer.interactions.length > 0 && (
+                    <span className="ml-2 text-caption font-normal text-apple-secondary">
+                      ({customer.interactions.length})
+                    </span>
+                  )}
+                </h2>
                 <button
                   onClick={() => setAddingInteraction(!addingInteraction)}
                   className="inline-flex items-center gap-2 text-body font-medium text-apple-blue hover:bg-[#E3F2FD] px-2.5 py-1.5 rounded-[6px] transition-colors duration-300"
@@ -766,15 +1107,15 @@ export default function CustomerDetailPage() {
                 </button>
               </div>
             </CardHeader>
-            <CardContent className="flex-1">
+            <CardContent>
               {/* Add follow-up form */}
               {addingInteraction && (
-                <div className="mb-5 p-4 rounded-[10px] bg-white border border-apple-border/30 space-y-3 shadow-sm">
+                <div className="mb-6 p-4 rounded-[12px] bg-white border border-apple-border/30 space-y-3 shadow-sm">
                   <div className="flex gap-2 flex-wrap">
                     <select
                       value={interactionType}
                       onChange={(e) => setInteractionType(e.target.value)}
-                      className="h-8 px-2 rounded-[8px] border border-apple-border/50 bg-white text-caption text-apple-black focus:outline-none focus:border-apple-blue"
+                      className="h-9 px-3 rounded-[8px] border border-apple-border/50 bg-white text-body text-apple-black focus:outline-none focus:border-apple-blue transition-colors duration-300"
                     >
                       <option value="note">跟进备注</option>
                       <option value="email">邮件沟通</option>
@@ -784,7 +1125,7 @@ export default function CustomerDetailPage() {
                     <select
                       value={interactionDirection}
                       onChange={(e) => setInteractionDirection(e.target.value)}
-                      className="h-8 px-2 rounded-[8px] border border-apple-border/50 bg-white text-caption text-apple-black focus:outline-none focus:border-apple-blue"
+                      className="h-9 px-3 rounded-[8px] border border-apple-border/50 bg-white text-body text-apple-black focus:outline-none focus:border-apple-blue transition-colors duration-300"
                     >
                       <option value="inbound">收到</option>
                       <option value="outbound">发出</option>
@@ -793,11 +1134,11 @@ export default function CustomerDetailPage() {
                       type="date"
                       value={interactionDate}
                       onChange={(e) => setInteractionDate(e.target.value)}
-                      className="h-8 px-2 rounded-[8px] border border-apple-border/50 bg-white text-caption text-apple-black focus:outline-none focus:border-apple-blue"
+                      className="h-9 px-3 rounded-[8px] border border-apple-border/50 bg-white text-body text-apple-black focus:outline-none focus:border-apple-blue transition-colors duration-300"
                     />
                   </div>
                   <textarea
-                    className="w-full h-24 px-3 py-2 rounded-[8px] border border-apple-border/50 bg-white text-body text-apple-black resize-none focus:outline-none focus:border-apple-blue transition-colors duration-300"
+                    className="w-full h-28 px-3 py-2.5 rounded-[8px] border border-apple-border/50 bg-white text-body text-apple-black resize-none focus:outline-none focus:border-apple-blue transition-colors duration-300"
                     value={interactionContent}
                     onChange={(e) => setInteractionContent(e.target.value)}
                     placeholder="记录跟进内容..."
@@ -816,27 +1157,39 @@ export default function CustomerDetailPage() {
 
               {/* Existing notes fallback */}
               {customer.notes && customer.interactions.length === 0 && (
-                <div className="mb-4 p-3 rounded-[10px] bg-white border border-apple-border/20 border-l-4" style={{ borderLeftColor: '#007AFF' }}>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-[#F5F5F7] text-apple-secondary">历史备注</span>
+                <div className="mb-4 p-4 rounded-[12px] bg-white border border-apple-border/20 border-l-4" style={{ borderLeftColor: '#007AFF' }}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#F5F5F7] text-apple-secondary">历史备注</span>
                     <span className="text-caption text-apple-secondary ml-auto">{timeAgo(customer.updatedAt)}</span>
                   </div>
-                  <p className="text-caption text-apple-secondary mt-1 whitespace-pre-wrap">{customer.notes}</p>
+                  <p className="text-body text-apple-secondary whitespace-pre-wrap leading-relaxed">{customer.notes}</p>
                 </div>
               )}
 
               {/* Interaction list */}
               {customer.interactions.length === 0 && !customer.notes ? (
-                <p className="text-caption text-apple-secondary py-4 text-center">暂无跟进记录，点击"添加跟进"开始记录</p>
+                <div className="text-center py-12">
+                  <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-[#F5F5F7] flex items-center justify-center">
+                    <MessageSquare className="w-6 h-6 text-apple-tetriary" />
+                  </div>
+                  <p className="text-body text-apple-secondary mb-4">暂无跟进记录</p>
+                  <button
+                    onClick={() => setAddingInteraction(true)}
+                    className="inline-flex items-center gap-2 px-4 py-2 text-body font-medium text-white bg-apple-blue hover:bg-[#0066CC] rounded-[10px] transition-all duration-300 shadow-sm"
+                  >
+                    <Plus className="w-4 h-4" />
+                    添加第一条跟进
+                  </button>
+                </div>
               ) : (
                 <div className="divide-y" style={{ borderColor: '#E5E5EA' }}>
                   {customer.interactions.map((interaction, idx) => (
                     <div
                       key={interaction.id}
-                      className={`${idx === 0 ? 'pb-3' : 'py-3'} ${idx === customer.interactions.length - 1 ? 'pb-0' : ''}`}
+                      className={`${idx === 0 ? 'pb-4' : 'py-4'} ${idx === customer.interactions.length - 1 ? 'pb-0' : ''}`}
                     >
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[11px] font-medium px-1.5 py-0.5 rounded-full"
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-[11px] font-medium px-2 py-0.5 rounded-full"
                           style={{
                             backgroundColor: interaction.direction === 'outbound' ? '#E3F2FD' : '#F5F5F7',
                             color: interaction.direction === 'outbound' ? '#1976D2' : '#86868B',
@@ -857,19 +1210,19 @@ export default function CustomerDetailPage() {
                             className="p-1 rounded-full hover:bg-white transition-colors text-apple-secondary hover:text-apple-blue"
                             title="编辑"
                           >
-                            <Edit3 className="w-3 h-3" />
+                            <Edit3 className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => deleteInteraction(interaction.id)}
                             className="p-1 rounded-full hover:bg-white transition-colors text-apple-secondary hover:text-apple-red"
                             title="删除"
                           >
-                            <Trash2 className="w-3 h-3" />
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       </div>
                       {interaction.content && (
-                        <p className="text-body mt-1 whitespace-pre-wrap leading-relaxed text-apple-black">
+                        <p className="text-body whitespace-pre-wrap leading-relaxed text-apple-black">
                           {interaction.content}
                         </p>
                       )}
@@ -880,169 +1233,322 @@ export default function CustomerDetailPage() {
             </CardContent>
           </Card>
         </div>
+      )}
 
-        {/* ── Right column ── */}
-        <div className="lg:col-span-4 lg:sticky lg:top-6 self-start space-y-4 md:space-y-5 lg:space-y-6">
-          {/* Merged details card */}
-          <Card>
-            <CardHeader>
-              <h2 className="text-subheading font-medium text-apple-black">客户详情</h2>
-            </CardHeader>
-            <CardContent className="space-y-0">
-              {/* Score — visual centerpiece */}
-              <div className="flex flex-col items-center py-4 border-b border-apple-border">
-                <CircularScore score={customer.score} grade={grade.grade} color={grade.color} />
-                <span className="text-caption mt-1.5 font-medium" style={{ color: grade.color }}>
-                  {grade.label}
-                </span>
-              </div>
+      {/* ═══════════════════════════════════════════ */}
+      {/* ── Tab: AI 背调 ── */}
+      {/* ═══════════════════════════════════════════ */}
+      {activeTab === 'background' && (() => {
+        const report = parseBackgroundReport();
+        return (
+          <div className="max-w-5xl mx-auto space-y-4 md:space-y-5 lg:space-y-6">
+            {/* Loading state */}
+            {bgCheckRunning && (
+              <Card>
+                <CardContent className="flex flex-col items-center py-20 gap-4">
+                  <div className="relative">
+                    <div className="w-16 h-16 rounded-2xl bg-[#E3F2FD] flex items-center justify-center">
+                      <Loader2 className="w-7 h-7 text-apple-blue animate-spin" />
+                    </div>
+                  </div>
+                  <p className="text-body font-medium text-apple-black">AI 正在分析 "{customer.company}"...</p>
+                  <div className="flex flex-col items-center gap-1.5">
+                    <span className="text-caption text-apple-secondary">正在抓取公开信息、行业数据和社交网络</span>
+                    <span className="text-[11px] text-apple-tetriary">预计需要 15-30 秒</span>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
-              {/* Source */}
-              <div className="flex items-center justify-between py-3 border-b border-apple-border">
-                <span className="text-body text-apple-secondary">来源</span>
-                <div className="flex items-center gap-2">
-                  {editingSource ? (
-                    <>
-                      <select
-                        value={selectedSource}
-                        onChange={(e) => setSelectedSource(e.target.value)}
-                        className="h-8 px-2 rounded-[8px] border border-apple-border/50 bg-white text-caption text-apple-black focus:outline-none focus:border-apple-blue"
-                      >
-                        <option value="">选择来源</option>
-                        {sourceOptions.map((opt) => (
-                          <option key={opt.value} value={opt.value}>{opt.label}</option>
-                        ))}
-                      </select>
-                      <button onClick={changeSource} className="text-caption font-medium text-apple-blue hover:bg-[#E3F2FD] px-2 py-1 rounded-[4px]">保存</button>
-                      <button onClick={() => { setEditingSource(false); setSelectedSource(customer.source || ''); }} className="text-caption text-apple-secondary hover:bg-[#F5F5F7] px-2 py-1 rounded-[4px]">取消</button>
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-body font-medium text-apple-black">
-                        {sourceLabels[customer.source || ''] || customer.source || '未设置'}
-                      </span>
-                      <button onClick={() => setEditingSource(true)} className="text-apple-secondary hover:text-apple-black transition-colors duration-300 p-1">
-                        <FileText className="w-3.5 h-3.5" />
-                      </button>
-                    </>
-                  )}
-                </div>
-              </div>
+            {/* Empty state */}
+            {!bgCheckRunning && !report && (
+              <Card>
+                <CardContent className="flex flex-col items-center py-20 gap-4">
+                  <div className="w-16 h-16 rounded-2xl bg-[#F5F5F7] flex items-center justify-center">
+                    <SearchCheck className="w-7 h-7 text-apple-tetriary" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-body font-medium text-apple-black mb-1">暂无AI背调报告</p>
+                    <p className="text-caption text-apple-secondary max-w-sm">
+                      AI 将自动分析客户公司背景、业务规模、采购需求和决策链，帮助您制定更精准的跟进策略
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleBgCheck}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 text-body font-medium text-white bg-apple-blue hover:bg-[#0066CC] rounded-[10px] transition-all duration-300 shadow-sm mt-2"
+                  >
+                    <SearchCheck className="w-4 h-4" />
+                    生成背调报告
+                  </button>
+                </CardContent>
+              </Card>
+            )}
 
-              {/* Next follow-up */}
-              <div className="flex items-center justify-between py-3 border-b border-apple-border">
-                <span className="text-body text-apple-secondary">下次跟进</span>
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-apple-secondary" />
-                  <input
-                    type="date"
-                    value={nextFollowUpDate}
-                    onChange={(e) => setNextFollowUpDate(e.target.value)}
-                    className="h-8 px-2 rounded-[8px] border border-apple-border/50 bg-white text-caption text-apple-black focus:outline-none focus:border-apple-blue transition-colors duration-300"
-                    style={{ width: '140px' }}
-                  />
-                </div>
-              </div>
-              {showOverdueFollowUp && (
-                <div className="flex items-center gap-1.5 pt-2 pb-1 text-caption text-apple-red">
-                  <Clock className="w-3 h-3" />
-                  计划跟进：{formatDate(customer.nextFollowUp)} (已逾期)
-                </div>
-              )}
-              {!showOverdueFollowUp && customer.nextFollowUp && (
-                <div className="flex items-center gap-1.5 pt-2 pb-1 text-caption text-apple-blue">
-                  <Clock className="w-3 h-3" />
-                  计划跟进：{formatDate(customer.nextFollowUp)}
-                </div>
-              )}
-              {hasFollowUpChange && (
-                <div className="pt-2 pb-1">
-                  <Button variant="primary" size="sm" onClick={saveNextFollowUp} disabled={saving} className="w-full text-caption h-8">
-                    保存日期
-                  </Button>
-                </div>
-              )}
-
-              {/* Tags */}
-              <div className="py-3">
-                <span className="text-body text-apple-secondary block mb-2">标签</span>
-                <div className="flex flex-wrap gap-1.5 mb-3">
-                  {customer.tags.length === 0 ? (
-                    <p className="text-caption text-apple-secondary">暂无标签</p>
-                  ) : (
-                    customer.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-caption transition-colors duration-300"
-                        style={{ backgroundColor: '#F5F5F7', color: '#86868B' }}
-                      >
-                        {tag}
-                        <button onClick={() => removeTag(tag)} className="hover:text-apple-red transition-colors duration-300 leading-none">
-                          <X className="w-3 h-3" />
-                        </button>
-                      </span>
-                    ))
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="添加标签..."
-                    value={newTag}
-                    onChange={(e) => setNewTag(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && addTag()}
-                    className="text-caption h-8"
-                  />
-                  <Button variant="secondary" size="sm" onClick={addTag} className="shrink-0">
-                    <TagIcon className="w-3.5 h-3.5" />
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* ── Background check card ── */}
-          <Card>
-            <CardHeader>
-              <h2 className="text-subheading font-medium text-apple-black">客户背调</h2>
-            </CardHeader>
-            <CardContent>
-              {editingBackgroundCheck ? (
-                <div className="space-y-3">
-                  <textarea
-                    className="w-full h-32 px-3 py-2 rounded-[8px] border border-apple-border/50 bg-white text-body text-apple-black resize-none focus:outline-none focus:border-apple-blue transition-colors duration-300"
-                    value={backgroundCheck}
-                    onChange={(e) => setBackgroundCheck(e.target.value)}
-                    placeholder="输入客户背调信息..."
-                  />
-                  <div className="flex gap-2">
-                    <Button variant="primary" size="sm" onClick={saveBackgroundCheck} disabled={saving}>
-                      保存
-                    </Button>
-                    <Button variant="secondary" size="sm" onClick={() => { setEditingBackgroundCheck(false); setBackgroundCheck(customer?.backgroundCheck || ''); }}>
-                      取消
-                    </Button>
+            {/* Report content */}
+            {!bgCheckRunning && report && (
+              <>
+                {/* Report header */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-apple-blue/10 flex items-center justify-center">
+                      <SearchCheck className="w-5 h-5 text-apple-blue" />
+                    </div>
+                    <div>
+                      <p className="text-subheading font-semibold text-apple-black">AI背调报告</p>
+                      <p className="text-[11px] text-apple-tetriary">
+                        生成时间：{new Date(report.generatedAt).toLocaleString('zh-CN')}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleBgCheck}
+                      disabled={bgCheckRunning}
+                      className="inline-flex items-center gap-1.5 text-caption font-medium text-apple-blue hover:bg-[#E3F2FD] px-3 py-1.5 rounded-[6px] transition-colors duration-300"
+                    >
+                      {bgCheckRunning ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <SearchCheck className="w-3.5 h-3.5" />}
+                      重新分析
+                    </button>
                   </div>
                 </div>
-              ) : (
-                <div>
-                  {backgroundCheck ? (
-                    <p className="text-body text-apple-black whitespace-pre-wrap leading-relaxed">{backgroundCheck}</p>
-                  ) : (
-                    <p className="text-caption text-apple-secondary">暂无背调信息</p>
-                  )}
+
+                {/* ── Company Info ── */}
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center gap-2">
+                      <Building2 className="w-4 h-4 text-apple-blue" />
+                      <h2 className="text-subheading font-medium text-apple-black">公司信息</h2>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      <InfoItem label="公司名称" value={report.companyInfo.name} />
+                      <InfoItem label="成立年份" value={report.companyInfo.founded} />
+                      <InfoItem label="员工规模" value={report.companyInfo.employees} />
+                      <InfoItem label="注册地址" value={report.companyInfo.address} />
+                      <InfoItem label="所属行业" value={report.companyInfo.industry} />
+                      <InfoItem label="注册号" value={report.companyInfo.registrationNumber} />
+                    </div>
+                    {report.companyInfo.website && report.companyInfo.website !== '未提供' && (
+                      <div className="mt-3 pt-3 border-t border-apple-border/30">
+                        <a
+                          href={report.companyInfo.website.startsWith('http') ? report.companyInfo.website : `https://${report.companyInfo.website}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 text-caption text-apple-blue hover:underline"
+                        >
+                          <Globe className="w-3.5 h-3.5" />
+                          {report.companyInfo.website}
+                        </a>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* ── Business Analysis ── */}
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-apple-blue" />
+                      <h2 className="text-subheading font-medium text-apple-black">业务分析</h2>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div>
+                        <span className="text-caption text-apple-secondary block mb-1">主营产品</span>
+                        <p className="text-body font-medium text-apple-black">{report.businessAnalysis.mainProducts}</p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <span className="text-caption text-apple-secondary block mb-1">目标市场</span>
+                          <p className="text-body text-apple-black">{report.businessAnalysis.targetMarkets}</p>
+                        </div>
+                        <div>
+                          <span className="text-caption text-apple-secondary block mb-1">年营收估算</span>
+                          <p className="text-body text-apple-black">{report.businessAnalysis.annualRevenue}</p>
+                        </div>
+                      </div>
+                      <div>
+                        <span className="text-caption text-apple-secondary block mb-1">规模评估</span>
+                        <p className="text-body text-apple-black leading-relaxed">{report.businessAnalysis.scaleAssessment}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* ── Decision Makers ── */}
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center gap-2">
+                      <Users className="w-4 h-4 text-apple-blue" />
+                      <h2 className="text-subheading font-medium text-apple-black">决策链识别</h2>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {report.decisionMakers.map((dm: { name: string; position: string; linkedin?: string; contact?: string; influence: string }, i: number) => (
+                        <div key={i} className="flex items-center gap-4 p-3 rounded-[10px] bg-[#F5F5F7]">
+                          <div
+                            className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-[14px] font-semibold"
+                            style={{
+                              backgroundColor: dm.influence === '决策者' ? '#E3F2FD' : '#F5F5F7',
+                              color: dm.influence === '决策者' ? '#1976D2' : '#86868B',
+                            }}
+                          >
+                            {dm.name[0]}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="text-body font-medium text-apple-black">{dm.name}</span>
+                              <span
+                                className="text-[10px] font-medium px-1.5 py-0.5 rounded-full"
+                                style={{
+                                  backgroundColor: dm.influence === '决策者' ? '#E3F2FD' : '#FFF3E0',
+                                  color: dm.influence === '决策者' ? '#1976D2' : '#E65100',
+                                }}
+                              >
+                                {dm.influence}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-3 mt-0.5 text-caption text-apple-secondary">
+                              <span>{dm.position}</span>
+                              {dm.contact && dm.contact !== '未获取' && (
+                                <span className="text-apple-blue">{dm.contact}</span>
+                              )}
+                            </div>
+                          </div>
+                          {dm.linkedin && (
+                            <a
+                              href={`https://${dm.linkedin}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-caption text-apple-blue hover:underline flex-shrink-0"
+                            >
+                              LinkedIn
+                            </a>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* ── Procurement ── */}
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center gap-2">
+                      <ShoppingCart className="w-4 h-4 text-apple-blue" />
+                      <h2 className="text-subheading font-medium text-apple-black">采购情报</h2>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-4">
+                      <InfoItem label="最近采购" value={report.procurement.lastPurchase} />
+                      <InfoItem label="采购频率" value={report.procurement.frequency} />
+                      <InfoItem label="采购品类" value={report.procurement.products} />
+                      <InfoItem label="估算预算" value={report.procurement.estimatedBudget} />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* ── AI Advice ── */}
+                <Card style={{ borderColor: report.aiAdvice.intentColor, borderWidth: '1px' }}>
+                  <CardHeader>
+                    <div className="flex items-center gap-2">
+                      <Lightbulb className="w-4 h-4" style={{ color: report.aiAdvice.intentColor }} />
+                      <h2 className="text-subheading font-medium text-apple-black">AI跟进建议</h2>
+                      <span
+                        className="text-[11px] font-medium px-2 py-0.5 rounded-full ml-auto"
+                        style={{
+                          backgroundColor: report.aiAdvice.intentColor + '20',
+                          color: report.aiAdvice.intentColor,
+                        }}
+                      >
+                        采购意向：{report.aiAdvice.intentLevel}
+                      </span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <span className="text-caption text-apple-secondary block mb-1.5">
+                        <Target className="w-3.5 h-3.5 inline mr-1" />
+                        跟进策略
+                      </span>
+                      <p className="text-body text-apple-black leading-relaxed">{report.aiAdvice.followUpAdvice}</p>
+                    </div>
+                    <div>
+                      <span className="text-caption text-apple-secondary block mb-1.5">
+                        <Target className="w-3.5 h-3.5 inline mr-1" />
+                        切入建议
+                      </span>
+                      <p className="text-body text-apple-black leading-relaxed">{report.aiAdvice.entryPoint}</p>
+                    </div>
+                    <div className="pt-2 border-t border-apple-border/30">
+                      <span className="text-caption text-apple-tetriary">
+                        建议联系时间：{report.aiAdvice.recommendedContactTime}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Download / Export */}
+                <div className="flex justify-end gap-2 pb-4">
                   <button
-                    onClick={() => setEditingBackgroundCheck(true)}
-                    className="mt-3 inline-flex items-center gap-1.5 text-caption font-medium text-apple-blue hover:bg-[#E3F2FD] px-2.5 py-1.5 rounded-[6px] transition-colors duration-300"
+                    onClick={() => {
+                      const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `${customer.company || 'customer'}_background_report.json`;
+                      a.click();
+                      URL.revokeObjectURL(url);
+                      toast('success', '背调报告已下载');
+                    }}
+                    className="inline-flex items-center gap-1.5 text-caption font-medium text-apple-blue hover:bg-[#E3F2FD] px-3 py-1.5 rounded-[6px] transition-colors duration-300"
                   >
-                    <Edit3 className="w-3 h-3" />
-                    {backgroundCheck ? '编辑背调' : '添加背调'}
+                    <Download className="w-3.5 h-3.5" />
+                    下载报告
                   </button>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+              </>
+            )}
+          </div>
+        );
+      })()}
+
+      {/* ── Edit Customer Modal ── */}
+      <AddCustomerModal
+        open={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        onSuccess={(cid, cname) => {
+          loadCustomer();
+          toast('success', `"${cname}" 已更新`);
+        }}
+        customer={{
+          id: customer.id,
+          company: customer.company,
+          country: customer.country,
+          industry: customer.industry,
+          size: customer.size,
+          website: customer.website,
+          score: customer.score,
+          status: customer.status,
+          customerType: customer.customerType,
+          tags: customer.tags,
+          source: customer.source,
+          contacts: customer.contacts,
+        }}
+      />
+    </div>
+  );
+}
+
+function InfoItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <span className="text-[11px] text-apple-tetriary block mb-0.5">{label}</span>
+      <span className="text-body text-apple-black">{value || '-'}</span>
     </div>
   );
 }

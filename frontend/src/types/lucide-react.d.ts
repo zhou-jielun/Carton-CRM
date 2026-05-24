@@ -38,6 +38,7 @@ declare module 'lucide-react' {
   export const Info: Icon;
   export const Key: Icon;
   export const LayoutDashboard: Icon;
+  export const Lightbulb: Icon;
   export const LineChart: Icon;
   export const Loader2: Icon;
   export const LogOut: Icon;
@@ -54,12 +55,15 @@ declare module 'lucide-react' {
   export const RefreshCw: Icon;
   export const Save: Icon;
   export const Search: Icon;
+  export const SearchCheck: Icon;
   export const Send: Icon;
   export const Settings: Icon;
   export const Settings2: Icon;
+  export const ShoppingCart: Icon;
   export const Smartphone: Icon;
   export const SortAsc: Icon;
   export const SortDesc: Icon;
+  export const Sparkles: Icon;
   export const Sun: Icon;
   export const Table2: Icon;
   export const Tag: Icon;
