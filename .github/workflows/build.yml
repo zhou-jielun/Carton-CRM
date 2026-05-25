@@ -49,16 +49,22 @@ jobs:
         shell: bash
         run: npm run build
 
-      - name: Install backend production deps (bundled)
+      - name: Prepare backend runtime node_modules
         shell: bash
         run: |
-          cd backend
-          npm install --omit=dev --install-strategy=nested
-          cd ..
-
-      - name: Copy Prisma generated client
-        shell: bash
-        run: cp -R node_modules/.prisma backend/node_modules/
+          # Install backend production deps in a temp dir - must not touch root node_modules
+          # (npm --omit=dev would prune electron/electron-builder from root!)
+          TMPDEPS=$(mktemp -d)
+          cp backend/package.json "$TMPDEPS/"
+          cp backend/package-lock.json "$TMPDEPS/" 2>/dev/null || true
+          cd "$TMPDEPS"
+          npm install --omit=dev --no-package-lock 2>&1 | tail -5
+          cd "$OLDPWD"
+          rm -rf backend/node_modules
+          cp -R "$TMPDEPS"/node_modules backend/
+          cp -R node_modules/.prisma backend/node_modules/
+          rm -rf "$TMPDEPS"
+          echo "Backend runtime deps ready: $(ls backend/node_modules | wc -l) packages"
 
       - name: Package Electron (${{ matrix.platform }})
         shell: bash
