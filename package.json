@@ -44,6 +44,14 @@
         "to": "backend/.env"
       },
       {
+        "from": "backend/.env.example",
+        "to": "backend/.env.example"
+      },
+      {
+        "from": "setup-win.bat",
+        "to": "../setup-win.bat"
+      },
+      {
         "from": "node_modules",
         "to": "backend/node_modules",
         "filter": [
