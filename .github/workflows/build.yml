@@ -28,24 +28,32 @@ jobs:
           cache: 'npm'
 
       - name: Create default .env (for build)
+        shell: bash
         run: |
-          echo 'DATABASE_URL=postgresql://postgres:postgres@localhost:5432/carton_crm' > backend/.env
-          echo 'JWT_SECRET=carton-crm-secret-change-me' >> backend/.env
-          echo 'PORT=3001' >> backend/.env
+          cat > backend/.env << 'EOF'
+          DATABASE_URL=postgresql://postgres:postgres@localhost:5432/carton_crm
+          JWT_SECRET=carton-crm-secret-change-me
+          PORT=3001
+          EOF
 
       - name: Install dependencies
+        shell: bash
         run: npm ci
 
       - name: Generate Prisma client (${{ matrix.platform }})
+        shell: bash
         run: npx -w carton-crm-backend prisma generate
 
       - name: Build backend & frontend
+        shell: bash
         run: npm run build
 
       - name: Package Electron (${{ matrix.platform }})
-        run: npx electron-builder --${{ matrix.platform }} --config
+        shell: bash
+        run: npx electron-builder --${{ matrix.platform }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEBUG: electron-builder
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
