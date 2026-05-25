@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: macos-latest
@@ -30,11 +31,11 @@ jobs:
       - name: Create default .env (for build)
         shell: bash
         run: |
-          cat > backend/.env << 'EOF'
+          cat > backend/.env << 'ENVEOF'
           DATABASE_URL=postgresql://postgres:postgres@localhost:5432/carton_crm
           JWT_SECRET=carton-crm-secret-change-me
           PORT=3001
-          EOF
+          ENVEOF
 
       - name: Install dependencies
         shell: bash
@@ -47,6 +48,17 @@ jobs:
       - name: Build backend & frontend
         shell: bash
         run: npm run build
+
+      - name: Install backend production deps (bundled)
+        shell: bash
+        run: |
+          cd backend
+          npm install --omit=dev --install-strategy=nested
+          cd ..
+
+      - name: Copy Prisma generated client
+        shell: bash
+        run: cp -R node_modules/.prisma backend/node_modules/
 
       - name: Package Electron (${{ matrix.platform }})
         shell: bash

@@ -17,7 +17,7 @@
     "db:push": "npm -w backend run db:push",
     "db:generate": "npm -w backend run db:generate",
     "electron:dev": "concurrently -k \"npm run dev:backend\" \"sleep 2 && npm run dev:frontend\" \"wait-on http://localhost:5173 && node_modules/electron/dist/Electron.app/Contents/MacOS/Electron .\"",
-    "electron:build": "npm run build && electron-builder --config",
+    "electron:build": "npm run build && npm -w backend install --omit=dev --install-strategy=nested && cp -R node_modules/.prisma backend/node_modules/ && electron-builder --config",
     "electron:start": "npm run build && node_modules/electron/dist/Electron.app/Contents/MacOS/Electron ."
   },
   "build": {
@@ -52,14 +52,8 @@
         "to": "../setup-win.bat"
       },
       {
-        "from": "node_modules",
-        "to": "backend/node_modules",
-        "filter": [
-          "**/*",
-          "!carton-crm-backend",
-          "!carton-crm-frontend",
-          "!.package-lock.json"
-        ]
+        "from": "backend/node_modules",
+        "to": "backend/node_modules"
       }
     ],
     "mac": {
