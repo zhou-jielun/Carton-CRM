@@ -10,6 +10,7 @@ release/
 !package.json
 !package-lock.json
 !tsconfig.json
+!tsconfig.node.json
 !tailwind.config.js
 !postcss.config.js
 !components.json
