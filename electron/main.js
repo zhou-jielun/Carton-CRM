@@ -1,10 +1,22 @@
 const { app, BrowserWindow, dialog } = require('electron');
-const { fork } = require('child_process');
+const { fork, execSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
 let mainWindow;
 let backendProcess;
+
+function freePort(port) {
+  try {
+    const pids = execSync(`lsof -ti :${port}`, { encoding: 'utf8' }).trim();
+    if (pids) {
+      console.log(`[Electron] Killing existing process on port ${port}: ${pids}`);
+      execSync(`kill -9 ${pids.split('\n').join(' ')}`);
+    }
+  } catch {
+    // lsof returns non-zero when nothing is on the port — this is expected
+  }
+}
 
 function getBackendPath() {
   if (app.isPackaged) {
@@ -133,6 +145,7 @@ function createWindow() {
 
 app.whenReady().then(async () => {
   try {
+    freePort(3001);
     await startBackend();
     createWindow();
   } catch (err) {
