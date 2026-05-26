@@ -1,43 +1,47 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
-import { formatNumber, timeAgo } from '@/lib/utils';
+import { formatNumber } from '@/lib/utils';
+import { STATUS_ORDER, statusLabels } from '@/lib/statusConfig';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import {
   Users,
   Mail,
   TrendingUp,
   Target,
-  Activity,
-  Clock,
-  AlertCircle,
-  CheckCircle2,
+  Sparkles,
   Loader2,
+  AlertCircle,
 } from 'lucide-react';
 
 interface DashboardData {
   customers: { total: number; newToday: number; newThisWeek: number; newThisMonth: number };
   campaigns: any[];
-  tasks: any[];
   highIntentCustomers: number;
+  statusCounts: Record<string, number>;
 }
 
-const statusLabels: Record<string, { label: string; variant: 'default' | 'success' | 'warning' | 'secondary' | 'destructive' }> = {
-  idle: { label: '待机', variant: 'secondary' },
-  running: { label: '运行中', variant: 'default' },
-  completed: { label: '已完成', variant: 'success' },
-  failed: { label: '失败', variant: 'destructive' },
-  paused: { label: '已暂停', variant: 'warning' },
+// 漏斗阶段：按 STATUS_ORDER 顺序，排除已流失/休眠（终端状态）
+const funnelColors: Record<string, string> = {
+  lead: 'bg-[#86868B]',
+  interested: 'bg-[#5C6BC0]',
+  contacted: 'bg-[#007AFF]',
+  following: 'bg-[#34C759]',
+  quoted: 'bg-[#FF9500]',
+  negotiating: 'bg-[#7B1FA2]',
+  sampling: 'bg-[#00838F]',
+  won: 'bg-apple-red',
+  lost: 'bg-[#BF360C]',
+  dormant: 'bg-[#9E9E9E]',
 };
 
-const taskTypeLabels: Record<string, string> = {
-  google_scrape: '谷歌获客',
-  email_send: '邮件发送',
-  whatsapp_send: 'WhatsApp推送',
-  data_analysis: '数据分析',
-  report: '自动报告',
-};
+const funnelStages = STATUS_ORDER
+  .filter((s) => s !== 'lost' && s !== 'dormant')
+  .map((status) => ({
+    status,
+    label: statusLabels[status] || status,
+    color: funnelColors[status] || 'bg-[#86868B]',
+  }));
 
 export default function Dashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
@@ -118,7 +122,7 @@ export default function Dashboard() {
       {/* Page Title */}
       <div>
         <h1 className="text-display text-apple-black">仪表盘</h1>
-        <p className="text-body text-apple-secondary mt-1">AI全自动外贸获客数据概览</p>
+        <p className="text-body text-apple-secondary mt-1">半自动AI获客数据概览</p>
       </div>
 
       {/* Stats Cards */}
@@ -143,48 +147,45 @@ export default function Dashboard() {
 
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* AI Task Status */}
+        {/* AI Lead Gen Quick Entry */}
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Activity className="w-5 h-5 text-apple-blue" />
-              AI任务运行状态
+              <Target className="w-5 h-5 text-apple-blue" />
+              AI 获客
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {data.tasks.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <Clock className="w-10 h-10 text-apple-secondary mb-3" />
-                <p className="text-body text-apple-secondary">暂无自动任务</p>
-                <p className="text-caption text-apple-secondary mt-1">在"自动任务"中创建您的第一个AI获客任务</p>
+            <div className="space-y-4">
+              <p className="text-caption text-apple-secondary">
+                半自动 AI 获客：输入目标市场 → AI 生成搜索关键词 → 手动搜索粘贴结果 → AI 分析提取客户 → 一键导入 CRM
+              </p>
+
+              {/* Stats row */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="bg-apple-surface rounded-[10px] p-3 text-center">
+                  <p className="text-display font-semibold text-apple-black">{formatNumber(data.customers.newToday)}</p>
+                  <p className="text-caption text-apple-secondary">今日新增</p>
+                </div>
+                <div className="bg-apple-surface rounded-[10px] p-3 text-center">
+                  <p className="text-display font-semibold text-apple-black">{formatNumber(data.customers.newThisWeek)}</p>
+                  <p className="text-caption text-apple-secondary">本周新增</p>
+                </div>
+                <div className="bg-apple-surface rounded-[10px] p-3 text-center">
+                  <p className="text-display font-semibold text-apple-black">{formatNumber(data.customers.total)}</p>
+                  <p className="text-caption text-apple-secondary">客户总数</p>
+                </div>
               </div>
-            ) : (
-              <div className="space-y-3">
-                {data.tasks.map((task: any) => (
-                  <div
-                    key={task.id}
-                    className="flex items-center justify-between p-4 rounded-[10px] bg-[#F5F5F7]"
-                  >
-                    <div>
-                      <p className="text-body font-medium text-apple-black">{task.name}</p>
-                      <p className="text-caption text-apple-secondary mt-0.5">
-                        {taskTypeLabels[task.type] || task.type}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      {task.lastRunAt && (
-                        <span className="text-caption text-apple-secondary">
-                          {timeAgo(task.lastRunAt)}
-                        </span>
-                      )}
-                      <Badge variant={statusLabels[task.status]?.variant || 'secondary'}>
-                        {statusLabels[task.status]?.label || task.status}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+
+              {/* CTA */}
+              <a
+                href="/acquisition"
+                className="inline-flex items-center gap-2 px-5 py-2.5 text-body font-medium text-white bg-apple-blue hover:bg-[#0066CC] transition-all duration-300 rounded-[10px] shadow-sm no-underline"
+              >
+                <Sparkles className="w-4 h-4" />
+                前往 AI 获客
+              </a>
+            </div>
           </CardContent>
         </Card>
 
@@ -236,25 +237,25 @@ export default function Dashboard() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            {[
-              { label: '线索', count: data.customers.total, color: 'bg-apple-blue', pct: 100 },
-              { label: '已触达', count: Math.floor(data.customers.total * 0.6), color: 'bg-[#007AFF]/80', pct: 60 },
-              { label: '跟进中', count: data.highIntentCustomers, color: 'bg-[#34C759]', pct: 30 },
-              { label: '已报价', count: Math.floor(data.highIntentCustomers * 0.5), color: 'bg-[#FF9500]', pct: 15 },
-              { label: '已成交', count: Math.floor(data.highIntentCustomers * 0.2), color: 'bg-apple-red', pct: 5 },
-            ].map((stage) => (
-              <div key={stage.label} className="text-center">
-                <div className="relative h-2 bg-[#F5F5F7] rounded-full mb-2 overflow-hidden">
-                  <div
-                    className={`h-full ${stage.color} rounded-full transition-all duration-500`}
-                    style={{ width: `${stage.pct}%` }}
-                  />
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+            {funnelStages.map((stage) => {
+              const count = data.statusCounts[stage.status] || 0;
+              const pct = data.customers.total > 0
+                ? Math.round((count / data.customers.total) * 100)
+                : 0;
+              return (
+                <div key={stage.status} className="text-center">
+                  <div className="relative h-2 bg-[#F5F5F7] rounded-full mb-2 overflow-hidden">
+                    <div
+                      className={`h-full ${stage.color} rounded-full transition-all duration-500`}
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                  <p className="text-display font-semibold text-apple-black">{formatNumber(count)}</p>
+                  <p className="text-caption text-apple-secondary">{stage.label}</p>
                 </div>
-                <p className="text-display font-semibold text-apple-black">{formatNumber(stage.count)}</p>
-                <p className="text-caption text-apple-secondary">{stage.label}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </CardContent>
       </Card>

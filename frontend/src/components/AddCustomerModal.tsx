@@ -35,13 +35,7 @@ interface Props {
 }
 
 const countries = ['俄罗斯', '西班牙', '越南', '巴西', '墨西哥', '印度', '土耳其', '阿联酋', '沙特', '印尼', '泰国', '马来西亚'];
-const sources = [
-  { value: 'google_search', label: '谷歌搜索' },
-  { value: 'customs_data', label: '海关数据' },
-  { value: 'exhibition', label: '展会' },
-  { value: 'referral', label: '转介绍' },
-  { value: 'other', label: '其他' },
-];
+const sourceHints = ['谷歌搜索', '海关数据', '展会', '转介绍', 'Google Maps', '阿里巴巴', 'LinkedIn'];
 const grades = ['A', 'B', 'C', 'D'];
 
 interface FormData {
@@ -56,6 +50,7 @@ interface FormData {
   source: string;
   grade: string;
   tags: string[];
+  website: string;
 }
 
 const defaultForm: FormData = {
@@ -70,6 +65,7 @@ const defaultForm: FormData = {
   source: '',
   grade: 'B',
   tags: [],
+  website: '',
 };
 
 export default function AddCustomerModal({ open, onClose, onSuccess, customer }: Props) {
@@ -81,6 +77,7 @@ export default function AddCustomerModal({ open, onClose, onSuccess, customer }:
   const [tagInput, setTagInput] = useState('');
   const [countrySearch, setCountrySearch] = useState('');
   const [countryOpen, setCountryOpen] = useState(false);
+  const [sourceOpen, setSourceOpen] = useState(false);
 
   const isEdit = !!customer;
 
@@ -100,6 +97,7 @@ export default function AddCustomerModal({ open, onClose, onSuccess, customer }:
           source: customer.source || '',
           grade: customer.score >= 80 ? 'A' : customer.score >= 60 ? 'B' : customer.score >= 40 ? 'C' : 'D',
           tags: customer.tags || [],
+          website: customer.website || '',
         });
       } else {
         setForm(defaultForm);
@@ -109,6 +107,7 @@ export default function AddCustomerModal({ open, onClose, onSuccess, customer }:
       setTagInput('');
       setCountrySearch('');
       setCountryOpen(false);
+      setSourceOpen(false);
     }
   }, [open, customer]);
 
@@ -121,12 +120,6 @@ export default function AddCustomerModal({ open, onClose, onSuccess, customer }:
     const e: Record<string, string> = {};
     if (!form.company.trim()) e.company = '请输入公司名称';
     if (!form.country) e.country = '请选择国家/地区';
-    if (!form.contactName.trim()) e.contactName = '请输入联系人姓名';
-    if (!form.contactEmail.trim()) {
-      e.contactEmail = '请输入邮箱';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.contactEmail)) {
-      e.contactEmail = '邮箱格式不正确';
-    }
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -139,14 +132,15 @@ export default function AddCustomerModal({ open, onClose, onSuccess, customer }:
       const body: Record<string, unknown> = {
         company: form.company.trim(),
         country: form.country,
-        contactName: form.contactName.trim(),
-        contactEmail: form.contactEmail.trim(),
+        contactName: form.contactName.trim() || undefined,
+        contactEmail: form.contactEmail.trim() || undefined,
         contactPhone: form.contactPhone.trim() || undefined,
         contactWhatsapp: form.contactWhatsapp.trim() || undefined,
         contactPosition: form.contactPosition.trim() || undefined,
         tags: form.tags,
         customerType: form.customerType || null,
-        source: form.source || null,
+        source: form.source.trim() || null,
+        website: form.website.trim() || null,
       };
 
       if (!isEdit) {
@@ -196,6 +190,10 @@ export default function AddCustomerModal({ open, onClose, onSuccess, customer }:
     c.toLowerCase().includes(countrySearch.toLowerCase())
   );
 
+  const filteredSourceHints = sourceHints.filter((h) =>
+    h.toLowerCase().includes(form.source.toLowerCase()) && form.source.trim() && h !== form.source
+  );
+
   const inputClass = (field: string) =>
     `w-full h-10 px-3 rounded-[8px] border text-body text-apple-black bg-white placeholder:text-apple-tetriary focus:outline-none focus:ring-2 focus:ring-apple-blue/40 transition-all duration-300 ${
       errors[field] ? 'border-apple-red focus:ring-apple-red/40' : 'border-apple-border'
@@ -205,17 +203,20 @@ export default function AddCustomerModal({ open, onClose, onSuccess, customer }:
 
   const fields = quickMode
     ? ['company', 'contactName', 'contactEmail', 'country']
-    : ['company', 'country', 'contactName', 'contactEmail', 'contactPhone', 'contactWhatsapp', 'contactPosition', 'customerType', 'source', 'grade', 'tags'];
+    : ['company', 'country', 'contactName', 'contactEmail', 'contactPhone', 'contactWhatsapp', 'contactPosition', 'customerType', 'source', 'grade', 'tags', 'website'];
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in"
       onClick={onClose}
     >
-      <div
-        className="bg-apple-card rounded-[16px] shadow-[0_10px_40px_rgba(0,0,0,0.1)] w-[600px] max-h-[85vh] flex flex-col mx-4"
-        onClick={(e) => e.stopPropagation()}
-      >
+        <div
+          className="bg-apple-card rounded-[16px] shadow-[0_10px_40px_rgba(0,0,0,0.1)] w-[600px] max-h-[85vh] flex flex-col mx-4"
+          onClick={(e) => {
+            e.stopPropagation();
+            setSourceOpen(false);
+          }}
+        >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-apple-border">
           <h2 className="text-[20px] font-semibold text-apple-black">
@@ -271,7 +272,7 @@ export default function AddCustomerModal({ open, onClose, onSuccess, customer }:
                 {/* Contact Name */}
                 <div>
                   <label className="block text-caption font-medium text-apple-black mb-1.5">
-                    联系人姓名 <span className="text-apple-red">*</span>
+                    联系人姓名
                   </label>
                   <input
                     className={inputClass('contactName')}
@@ -279,13 +280,12 @@ export default function AddCustomerModal({ open, onClose, onSuccess, customer }:
                     onChange={(e) => setField('contactName', e.target.value)}
                     placeholder="例如：John Smith"
                   />
-                  {errors.contactName && <p className="text-[11px] text-apple-red mt-1">{errors.contactName}</p>}
                 </div>
 
                 {/* Email */}
                 <div>
                   <label className="block text-caption font-medium text-apple-black mb-1.5">
-                    邮箱 <span className="text-apple-red">*</span>
+                    邮箱
                   </label>
                   <input
                     className={inputClass('contactEmail')}
@@ -294,7 +294,6 @@ export default function AddCustomerModal({ open, onClose, onSuccess, customer }:
                     placeholder="john@paperpack.com"
                     type="email"
                   />
-                  {errors.contactEmail && <p className="text-[11px] text-apple-red mt-1">{errors.contactEmail}</p>}
                 </div>
 
                 {/* Phone */}
@@ -392,18 +391,46 @@ export default function AddCustomerModal({ open, onClose, onSuccess, customer }:
                 </div>
 
                 {/* Source */}
-                <div>
+                <div className="relative">
                   <label className="block text-caption font-medium text-apple-black mb-1.5">客户来源</label>
-                  <select
+                  <input
                     className={inputClass('source')}
                     value={form.source}
-                    onChange={(e) => setField('source', e.target.value)}
-                  >
-                    <option value="">选择来源</option>
-                    {sources.map((s) => (
-                      <option key={s.value} value={s.value}>{s.label}</option>
-                    ))}
-                  </select>
+                    onChange={(e) => {
+                      setField('source', e.target.value);
+                      setSourceOpen(true);
+                    }}
+                    onFocus={() => setSourceOpen(true)}
+                    placeholder="例如：谷歌搜索、展会、转介绍..."
+                  />
+                  {sourceOpen && filteredSourceHints.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 mt-1 z-50 bg-white border border-apple-border rounded-[8px] shadow-apple-lg max-h-40 overflow-y-auto py-1">
+                      {filteredSourceHints.map((h) => (
+                        <button
+                          key={h}
+                          onClick={() => {
+                            setField('source', h);
+                            setSourceOpen(false);
+                          }}
+                          className="w-full text-left px-3 py-2 text-body text-apple-black hover:bg-apple-surface transition-colors duration-200"
+                        >
+                          {h}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Website */}
+                <div>
+                  <label className="block text-caption font-medium text-apple-black mb-1.5">官网</label>
+                  <input
+                    className={inputClass('website')}
+                    value={form.website}
+                    onChange={(e) => setField('website', e.target.value)}
+                    placeholder="https://www.example.com"
+                    type="url"
+                  />
                 </div>
 
                 {/* Grade */}
@@ -497,7 +524,7 @@ export default function AddCustomerModal({ open, onClose, onSuccess, customer }:
               </div>
               <div>
                 <label className="block text-caption font-medium text-apple-black mb-1.5">
-                  联系人姓名 <span className="text-apple-red">*</span>
+                  联系人姓名
                 </label>
                 <input
                   className={inputClass('contactName')}
@@ -505,11 +532,10 @@ export default function AddCustomerModal({ open, onClose, onSuccess, customer }:
                   onChange={(e) => setField('contactName', e.target.value)}
                   placeholder="例如：John Smith"
                 />
-                {errors.contactName && <p className="text-[11px] text-apple-red mt-1">{errors.contactName}</p>}
               </div>
               <div>
                 <label className="block text-caption font-medium text-apple-black mb-1.5">
-                  邮箱 <span className="text-apple-red">*</span>
+                  邮箱
                 </label>
                 <input
                   className={inputClass('contactEmail')}
@@ -518,7 +544,6 @@ export default function AddCustomerModal({ open, onClose, onSuccess, customer }:
                   placeholder="john@paperpack.com"
                   type="email"
                 />
-                {errors.contactEmail && <p className="text-[11px] text-apple-red mt-1">{errors.contactEmail}</p>}
               </div>
               <div className="relative">
                 <label className="block text-caption font-medium text-apple-black mb-1.5">

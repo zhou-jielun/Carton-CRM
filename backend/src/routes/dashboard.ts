@@ -30,6 +30,17 @@ router.get('/stats', authenticate, async (req: AuthRequest, res, next) => {
       }),
     ]);
 
+    // 按状态统计客户数量（真实数据）
+    const statusCounts = await prisma.customer.groupBy({
+      by: ['status'],
+      where: { userId },
+      _count: { status: true },
+    });
+    const statusMap: Record<string, number> = {};
+    for (const s of statusCounts) {
+      statusMap[s.status] = s._count.status;
+    }
+
     const highIntentCustomers = await prisma.customer.count({
       where: { userId, score: { gte: 70 } },
     });
@@ -41,6 +52,8 @@ router.get('/stats', authenticate, async (req: AuthRequest, res, next) => {
         campaigns,
         tasks,
         highIntentCustomers,
+        // 真实状态分布
+        statusCounts: statusMap,
       },
     });
   } catch (err) {

@@ -2,7 +2,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { LogOut, Bell, Moon, Sun, Menu } from 'lucide-react';
+import { LogOut, Moon, Sun, Menu } from 'lucide-react';
+import { NotificationBell } from './NotificationBell';
 
 interface TopNavProps {
   onMenuClick?: () => void;
@@ -37,10 +38,7 @@ export function TopNav({ onMenuClick }: TopNavProps) {
         </button>
 
         {/* Notification bell */}
-        <button className="relative p-2 rounded-[10px] text-apple-secondary hover:text-apple-black dark:hover:text-white hover:bg-[#F5F5F7] dark:hover:bg-[#2C2C2E] transition-all duration-300">
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-apple-red rounded-full" />
-        </button>
+        <NotificationBell />
 
         {/* User avatar */}
         <div className="flex items-center gap-3">

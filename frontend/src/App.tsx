@@ -12,6 +12,7 @@ import CustomersPage from '@/pages/Customers';
 import CustomerDetailPage from '@/pages/CustomerDetail';
 import TasksPage from '@/pages/Tasks';
 import SettingsPage from '@/pages/Settings';
+import RemindersPage from '@/pages/Reminders';
 
 const AnalyticsPage = lazy(() => import('@/pages/Analytics'));
 
@@ -34,6 +35,7 @@ function App() {
         {/* Protected routes */}
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/reminders" element={<RemindersPage />} />
           <Route path="/customers" element={<CustomersPage />} />
           <Route path="/customers/:id" element={<CustomerDetailPage />} />
           <Route path="/acquisition" element={<AcquisitionPage />} />

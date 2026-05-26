@@ -71,6 +71,7 @@ model Customer {
   notes          String?
   backgroundCheck String?
   nextFollowUp DateTime?
+  firstContactDate DateTime?
   createdAt    DateTime @default(now())
   updatedAt DateTime @updatedAt
 

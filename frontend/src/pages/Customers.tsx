@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { timeAgo } from '@/lib/utils';
 import { getCountryFlag } from '@/lib/countryFlags';
+import { statusLabels, statusChipStyles, quickFilters } from '@/lib/statusConfig';
 
 function scoreToGrade(score: number): { grade: string; color: string; bg: string; label: string } {
   if (score >= 80) return { grade: 'A', color: '#388E3C', bg: '#E8F5E9', label: '优质' };
@@ -46,36 +47,9 @@ interface Customer {
   customerType?: string;
   tags: string[];
   createdAt: string;
+  nextFollowUp?: string | null;
   contacts: Array<{ email?: string; phone?: string; whatsapp?: string }>;
 }
-
-const statusLabels: Record<string, string> = {
-  lead: '线索',
-  contacted: '已触达',
-  following: '跟进中',
-  quoted: '已报价',
-  won: '已成交',
-  dormant: '休眠',
-};
-
-const quickFilters = [
-  { key: 'all', label: '全部', grade: '', status: '' },
-  { key: 'grade-a', label: 'A', grade: 'A', status: '' },
-  { key: 'grade-b', label: 'B', grade: 'B', status: '' },
-  { key: 'grade-c', label: 'C', grade: 'C', status: '' },
-  { key: 'status-lead', label: '待跟进', grade: '', status: 'lead' },
-  { key: 'status-contacted', label: '已触达', grade: '', status: 'contacted' },
-  { key: 'status-following', label: '跟进中', grade: '', status: 'following' },
-];
-
-const statusChipStyles: Record<string, { bg: string; color: string }> = {
-  lead: { bg: '#F5F5F7', color: '#86868B' },
-  contacted: { bg: '#E3F2FD', color: '#1976D2' },
-  following: { bg: '#FFF3E0', color: '#E65100' },
-  quoted: { bg: '#E8F5E9', color: '#388E3C' },
-  won: { bg: '#E8F5E9', color: '#388E3C' },
-  dormant: { bg: '#FBE9E7', color: '#BF360C' },
-};
 
 const customerTypeLabels: Record<string, string> = {
   end_user: '终端客户',
@@ -106,6 +80,9 @@ export default function CustomersPage() {
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<any>(null);
   const [bgCheckLoading, setBgCheckLoading] = useState<Set<string>>(new Set());
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     loadCustomers();
@@ -132,16 +109,25 @@ export default function CustomersPage() {
     });
   }, [customers, filterGrade, filterStatus]);
 
-  const loadCustomers = async (query?: string) => {
+  const loadCustomers = async (query?: string, pageNum?: number, statusFilter?: string) => {
     setLoading(true);
+    const p = pageNum ?? page;
+    // 有状态筛选时用大 limit 一次性拉取，避免分页导致筛选缺漏
+    const activeStatus = statusFilter !== undefined ? statusFilter : filterStatus;
+    const limitVal = activeStatus ? '500' : '50';
     try {
-      const params = new URLSearchParams({ limit: '50' });
+      const params = new URLSearchParams({ limit: limitVal, page: String(p) });
       if (query) params.set('search', query);
+      if (activeStatus) params.set('status', activeStatus);
       const res = await fetch(`/api/customers?${params}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       const data = await res.json();
-      if (data.success) setCustomers(data.data);
+      if (data.success) {
+        setCustomers(data.data);
+        setTotalCount(data.total ?? data.data.length);
+        setTotalPages(data.totalPages ?? 1);
+      }
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -149,9 +135,16 @@ export default function CustomersPage() {
     }
   };
 
+  const goToPage = (p: number) => {
+    if (p < 1 || p > totalPages) return;
+    setPage(p);
+    loadCustomers(search, p, filterStatus);
+  };
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    loadCustomers(search);
+    setPage(1);
+    loadCustomers(search, 1, filterStatus);
   };
 
   const handleExport = async (format: 'json' | 'xlsx') => {
@@ -179,7 +172,8 @@ export default function CustomersPage() {
 
   const handleImportComplete = () => {
     setImportOpen(false);
-    loadCustomers(search);
+    setPage(1);
+    loadCustomers(search, 1);
   };
 
   const handleDeleteAll = async () => {
@@ -209,6 +203,10 @@ export default function CustomersPage() {
   const handleFilterClick = (grade: string, status: string) => {
     setFilterGrade(grade);
     setFilterStatus(status);
+    // 切换筛选时清空搜索词，传 status 给后端确保跨页正确过滤
+    setSearch('');
+    setPage(1);
+    loadCustomers('', 1, status);
   };
 
   const handleAddSuccess = (customerId: string, company: string) => {
@@ -270,7 +268,7 @@ export default function CustomersPage() {
         <div>
           <h1 className="text-display text-apple-black">客户库</h1>
           <p className="text-body text-apple-secondary mt-1">
-            共 {customers.length} 个客户 · AI自动归档全量数据
+            共 {totalCount} 个客户 · AI自动归档全量数据
           </p>
         </div>
         <div className="flex items-center gap-2.5">
@@ -544,6 +542,22 @@ export default function CustomersPage() {
                           ))}
                         </div>
                       )}
+
+                      {customer.nextFollowUp && (() => {
+                        const nfDate = new Date(customer.nextFollowUp);
+                        const now = new Date();
+                        const todayOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                        const nfOnly = new Date(nfDate.getFullYear(), nfDate.getMonth(), nfDate.getDate());
+                        const diff = Math.round((nfOnly.getTime() - todayOnly.getTime()) / 86400000);
+                        const isOverdue = diff < 0;
+                        const isToday = diff === 0;
+                        return (
+                          <div className={`flex items-center gap-1 mt-1.5 text-caption ${isOverdue ? 'text-apple-red' : isToday ? 'text-[#FF9500]' : 'text-apple-blue'}`}>
+                            <span className="text-xs">📅</span>
+                            {isOverdue ? `逾期 ${Math.abs(diff)} 天` : isToday ? '今天跟进' : `${diff} 天后跟进`}
+                          </div>
+                        );
+                      })()}
                     </div>
 
                     {/* Chevron + Background Check */}
@@ -569,6 +583,33 @@ export default function CustomersPage() {
               </Card>
             );
           })}
+        </div>
+      )}
+
+      {/* ── Pagination ── */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-3 py-4">
+          <button
+            onClick={() => goToPage(page - 1)}
+            disabled={page <= 1}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-body font-medium rounded-[8px] transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed"
+            style={{ color: page <= 1 ? '#86868B' : '#007AFF', backgroundColor: page <= 1 ? 'transparent' : '#E3F2FD' }}
+          >
+            <ChevronRight className="w-4 h-4 rotate-180" />
+            上一页
+          </button>
+          <span className="text-body text-apple-secondary px-2">
+            第 {page} 页 / 共 {totalPages} 页
+          </span>
+          <button
+            onClick={() => goToPage(page + 1)}
+            disabled={page >= totalPages}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-body font-medium rounded-[8px] transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed"
+            style={{ color: page >= totalPages ? '#86868B' : '#007AFF', backgroundColor: page >= totalPages ? 'transparent' : '#E3F2FD' }}
+          >
+            下一页
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
       )}
 

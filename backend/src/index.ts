@@ -13,6 +13,8 @@ import acquisitionRoutes from './routes/acquisition';
 import customerRoutes from './routes/customers';
 import taskRoutes from './routes/tasks';
 import analyticsRoutes from './routes/analytics';
+import reminderRoutes from './routes/reminders';
+import aiLeadsRoutes from './routes/aiLeads';
 import path from 'path';
 
 const app = express();
@@ -48,7 +50,9 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/campaigns', campaignRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/acquisition', acquisitionRoutes);
+app.use('/api/ai-leads', aiLeadsRoutes);
 app.use('/api/customers', customerRoutes);
+app.use('/api/reminders', reminderRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/analytics', analyticsRoutes);
 

@@ -37,6 +37,7 @@ import {
 } from 'lucide-react';
 import { timeAgo } from '@/lib/utils';
 import { getCountryFlag } from '@/lib/countryFlags';
+import { statusLabels, statusChipStyles } from '@/lib/statusConfig';
 
 function scoreToGrade(score: number): { grade: string; color: string; bg: string; label: string } {
   if (score >= 80) return { grade: 'A', color: '#388E3C', bg: '#E8F5E9', label: '优质' };
@@ -44,24 +45,6 @@ function scoreToGrade(score: number): { grade: string; color: string; bg: string
   if (score >= 40) return { grade: 'C', color: '#E65100', bg: '#FFF3E0', label: '一般' };
   return { grade: 'D', color: '#757575', bg: '#F5F5F5', label: '待跟进' };
 }
-
-const statusLabels: Record<string, string> = {
-  lead: '线索',
-  contacted: '已触达',
-  following: '跟进中',
-  quoted: '已报价',
-  won: '已成交',
-  dormant: '休眠',
-};
-
-const statusChipStyles: Record<string, { bg: string; color: string }> = {
-  lead: { bg: '#F5F5F7', color: '#86868B' },
-  contacted: { bg: '#E3F2FD', color: '#1976D2' },
-  following: { bg: '#FFF3E0', color: '#E65100' },
-  quoted: { bg: '#E8F5E9', color: '#388E3C' },
-  won: { bg: '#E8F5E9', color: '#388E3C' },
-  dormant: { bg: '#FBE9E7', color: '#BF360C' },
-};
 
 const sourceLabels: Record<string, string> = {
   google_search: '谷歌搜索',
@@ -119,6 +102,7 @@ interface CustomerDetail {
   source?: string | null;
   notes?: string | null;
   nextFollowUp?: string | null;
+  firstContactDate?: string | null;
   createdAt: string;
   updatedAt: string;
   contacts: Contact[];
@@ -181,12 +165,13 @@ export default function CustomerDetailPage() {
   const [interactionDate, setInteractionDate] = useState(new Date().toISOString().slice(0, 10));
   const [addingInteractionLoading, setAddingInteractionLoading] = useState(false);
   const [nextFollowUpDate, setNextFollowUpDate] = useState('');
+  const [firstContactDate, setFirstContactDate] = useState('');
   const [editingSource, setEditingSource] = useState(false);
   const [selectedSource, setSelectedSource] = useState('');
   const interactionRef = useRef<HTMLDivElement>(null);
   // Navigation
   const [customerIds, setCustomerIds] = useState<string[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(-1);
+  const currentIndex = customerIds.indexOf(id || '');
   // Interaction editing
   const [editingInteractionId, setEditingInteractionId] = useState<string | null>(null);
   // Background check
@@ -203,7 +188,7 @@ export default function CustomerDetailPage() {
 
   useEffect(() => {
     loadCustomerIds();
-  }, []);
+  }, []); // 只在挂载时加载一次客户 ID 列表
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -217,12 +202,16 @@ export default function CustomerDetailPage() {
       // Don't navigate when Ctrl/Meta is held (e.g. Ctrl+Arrow for word jump)
       if (e.ctrlKey || e.metaKey || e.altKey) return;
 
-      if (e.key === 'ArrowRight') navigateToNext();
-      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') navigateToPrev();
+      if (e.key === 'ArrowRight' && currentIndex < customerIds.length - 1) {
+        navigate(`/customers/${customerIds[currentIndex + 1]}`);
+      }
+      if ((e.key === 'ArrowLeft' || e.key === 'ArrowUp') && currentIndex > 0) {
+        navigate(`/customers/${customerIds[currentIndex - 1]}`);
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentIndex, customerIds]);
+  }, [currentIndex, customerIds, navigate]);
 
   const loadCustomer = async () => {
     setLoading(true);
@@ -238,6 +227,7 @@ export default function CustomerDetailPage() {
       if (data.success) {
         setCustomer(data.customer);
         setNextFollowUpDate(data.customer.nextFollowUp ? data.customer.nextFollowUp.slice(0, 10) : '');
+        setFirstContactDate(data.customer.firstContactDate ? data.customer.firstContactDate.slice(0, 10) : '');
         setSelectedSource(data.customer.source || '');
         setBackgroundCheck(data.customer.backgroundCheck || '');
       } else {
@@ -258,7 +248,6 @@ export default function CustomerDetailPage() {
       const data = await res.json();
       if (data.success) {
         setCustomerIds(data.ids);
-        setCurrentIndex(data.ids.indexOf(id || ''));
       }
     } catch { /* silent */ }
   };
@@ -332,6 +321,11 @@ export default function CustomerDetailPage() {
   const saveNextFollowUp = () => {
     const val = nextFollowUpDate ? new Date(nextFollowUpDate).toISOString() : null;
     updateCustomer({ nextFollowUp: val });
+  };
+
+  const saveFirstContact = () => {
+    const val = firstContactDate ? new Date(firstContactDate).toISOString() : null;
+    updateCustomer({ firstContactDate: val });
   };
 
   const deleteCustomer = async () => {
@@ -522,6 +516,7 @@ export default function CustomerDetailPage() {
   const statusChip = statusChipStyles[customer.status] || { bg: '#F5F5F7', color: '#86868B' };
   const hasFollowUpChange = nextFollowUpDate !== (customer.nextFollowUp ? customer.nextFollowUp.slice(0, 10) : '');
   const showOverdueFollowUp = customer.nextFollowUp && new Date(customer.nextFollowUp) < new Date();
+  const hasFirstContactChange = firstContactDate !== (customer.firstContactDate ? customer.firstContactDate.slice(0, 10) : '');
 
   return (
     <div className="min-h-screen bg-apple-background max-w-[1600px] mx-auto w-full px-4 md:px-6 lg:px-8 xl:px-10 py-5 md:py-6 lg:py-8 space-y-5 animate-fade-in">
@@ -991,6 +986,34 @@ export default function CustomerDetailPage() {
                   </div>
                 </div>
 
+                {/* First contact */}
+                <div className="flex items-center justify-between py-3 border-b border-apple-border">
+                  <span className="text-body text-apple-secondary">首次跟进</span>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-apple-secondary" />
+                    <input
+                      type="date"
+                      value={firstContactDate}
+                      onChange={(e) => setFirstContactDate(e.target.value)}
+                      className="h-8 px-2 rounded-[8px] border border-apple-border/50 bg-white text-caption text-apple-black focus:outline-none focus:border-apple-blue transition-colors duration-300"
+                      style={{ width: '140px' }}
+                    />
+                  </div>
+                </div>
+                {customer.firstContactDate && !hasFirstContactChange && (
+                  <div className="flex items-center gap-1.5 pt-2 pb-1 text-caption text-apple-blue">
+                    <Clock className="w-3 h-3" />
+                    首次跟进：{formatDate(customer.firstContactDate)}
+                  </div>
+                )}
+                {hasFirstContactChange && (
+                  <div className="pt-2 pb-1">
+                    <Button variant="primary" size="sm" onClick={saveFirstContact} disabled={saving} className="w-full text-caption h-8">
+                      保存日期
+                    </Button>
+                  </div>
+                )}
+
                 {/* Next follow-up */}
                 <div className="flex items-center justify-between py-3 border-b border-apple-border">
                   <span className="text-body text-apple-secondary">下次跟进</span>
@@ -1000,6 +1023,7 @@ export default function CustomerDetailPage() {
                       type="date"
                       value={nextFollowUpDate}
                       onChange={(e) => setNextFollowUpDate(e.target.value)}
+                      onBlur={() => { if (hasFollowUpChange && !saving) saveNextFollowUp(); }}
                       className="h-8 px-2 rounded-[8px] border border-apple-border/50 bg-white text-caption text-apple-black focus:outline-none focus:border-apple-blue transition-colors duration-300"
                       style={{ width: '140px' }}
                     />

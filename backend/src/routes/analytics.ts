@@ -83,8 +83,8 @@ router.get('/overview', authenticate, async (req: AuthRequest, res: Response, ne
     res.json({
       success: true,
       data: {
-        statusBreakdown: statusBreakdown.map((s) => ({ status: s.status, count: s._count.id })),
-        sourceBreakdown: sourceBreakdown.map((s) => ({ source: s.source, count: s._count.id })),
+        statusBreakdown: statusBreakdown.map((s: { status: string | null; _count: { id: number } }) => ({ status: s.status, count: s._count.id })),
+        sourceBreakdown: sourceBreakdown.map((s: { source: string | null; _count: { id: number } }) => ({ source: s.source, count: s._count.id })),
         monthlyCustomers: Object.entries(monthlyData).map(([month, count]) => ({ month, count })),
         campaignStats: {
           sent: campaignStats._sum.totalSent || 0,
@@ -92,8 +92,8 @@ router.get('/overview', authenticate, async (req: AuthRequest, res: Response, ne
           clicked: campaignStats._sum.totalClicked || 0,
           replied: campaignStats._sum.totalReplied || 0,
         },
-        interactionsByType: interactionsByType.map((i) => ({ type: i.type, count: i._count.id })),
-        countryBreakdown: countryBreakdown.map((c) => ({ country: c.country, count: c._count.id })),
+        interactionsByType: interactionsByType.map((i: { type: string; _count: { id: number } }) => ({ type: i.type, count: i._count.id })),
+        countryBreakdown: countryBreakdown.map((c: { country: string | null; _count: { id: number } }) => ({ country: c.country, count: c._count.id })),
         scoreDistribution,
       },
     });

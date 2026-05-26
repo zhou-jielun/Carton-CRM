@@ -1,22 +1,33 @@
 const stageMap: Record<string, string> = {
   '潜在客户': 'lead',
   '已触达': 'contacted',
+  '初次联系': 'contacted',
+  '意向明确': 'interested',
   '跟进中': 'following',
+  '需求挖掘': 'following',
   '已报价': 'quoted',
+  '报价中': 'quoted',
+  '谈判中': 'negotiating',
+  '样品确认': 'sampling',
   '已成交': 'won',
+  '已流失': 'lost',
   '休眠': 'dormant',
 };
 
 const reverseStageMap: Record<string, string> = {
   lead: '潜在客户',
+  interested: '意向明确',
   contacted: '已触达',
   following: '跟进中',
   quoted: '已报价',
+  negotiating: '谈判中',
+  sampling: '样品确认',
   won: '已成交',
+  lost: '已流失',
   dormant: '休眠',
 };
 
-const priorityScore: Record<string, number> = { A: 90, B: 60, C: 30 };
+const priorityScore: Record<string, number> = { A: 90, B: 65, C: 45, D: 20 };
 
 export interface BackupCustomer {
   name?: string;
@@ -56,12 +67,13 @@ export interface BackupCustomer {
 const additionalFields = [
   'techContact', 'foundedDate', 'targetEquipment', 'equipmentSpecs',
   'needsFactoryInspection', 'mainProduct', 'companySize',
+  // 工厂画像字段 → backgroundCheck（不再生成 interaction）
+  'currentCapacity', 'currentEquipment', 'corePainPoints',
+  'mainIndustries', 'budget', 'expectedPurchaseTime',
 ];
 
 const interactionFields = [
-  'firstContactDate', 'currentCapacity', 'currentEquipment',
-  'corePainPoints', 'mainIndustries', 'budget', 'expectedPurchaseTime',
-  'nextFollowUp', 'contactPerson',
+  'firstContactDate', 'nextFollowUp', 'contactPerson',
 ];
 
 export function backupToPrisma(record: BackupCustomer) {
@@ -103,6 +115,8 @@ export function backupToPrisma(record: BackupCustomer) {
     tags: record.tags || [],
     source: record.source || 'manual_import',
     notes: Object.keys(notes).length > 0 ? JSON.stringify(notes) : null,
+    firstContactDate: record.firstContactDate ? new Date(record.firstContactDate) : undefined,
+    nextFollowUp: record.nextFollowUp ? new Date(record.nextFollowUp) : undefined,
     contacts: record.contactPerson || record.email || record.whatsapp
       ? {
           create: {
@@ -128,6 +142,8 @@ export function prismaToBackup(customer: {
   tags: string[];
   source: string | null;
   notes: string | null;
+  firstContactDate: Date | null;
+  nextFollowUp: Date | null;
   createdAt: Date;
   updatedAt: Date;
   contacts?: Array<{ name: string | null; email: string | null; whatsapp: string | null }>;
@@ -148,7 +164,9 @@ export function prismaToBackup(customer: {
     website: customer.website || '',
     source: customer.source || '',
     companySize: (notes.companySize as string) || customer.size || '',
-    firstContactDate: (notes.firstContactDate as string) || '',
+    firstContactDate: customer.firstContactDate
+      ? customer.firstContactDate.toISOString().slice(0, 10)
+      : '',
     foundedDate: (notes.foundedDate as string) || '',
     currentCapacity: (notes.currentCapacity as string) || '',
     currentEquipment: (notes.currentEquipment as string) || '',
@@ -160,9 +178,11 @@ export function prismaToBackup(customer: {
     expectedPurchaseTime: (notes.expectedPurchaseTime as string) || '',
     needsFactoryInspection: (notes.needsFactoryInspection as boolean) || false,
     stage: reverseStageMap[customer.status] || customer.status,
-    priority: customer.score >= 80 ? 'A' : customer.score >= 45 ? 'B' : 'C',
+    priority: customer.score >= 80 ? 'A' : customer.score >= 60 ? 'B' : customer.score >= 40 ? 'C' : 'D',
     customerType: customer.customerType || '',
-    nextFollowUp: (notes.nextFollowUp as string) || '',
+    nextFollowUp: customer.nextFollowUp
+      ? customer.nextFollowUp.toISOString().slice(0, 10)
+      : '',
     tags: customer.tags || [],
     createdAt: customer.createdAt.toISOString(),
     updatedAt: customer.updatedAt.toISOString(),

@@ -17,6 +17,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart as RPieChart, Pie, Cell, LineChart as RLineChart, Line, Legend,
 } from 'recharts';
+import { STATUS_ORDER, statusLabels } from '@/lib/statusConfig';
 
 interface AnalyticsData {
   statusBreakdown: Array<{ status: string; count: number }>;
@@ -27,10 +28,6 @@ interface AnalyticsData {
   countryBreakdown: Array<{ country: string; count: number }>;
   scoreDistribution: Array<{ range: string; count: number }>;
 }
-
-const STATUS_LABELS: Record<string, string> = {
-  lead: '线索', contacted: '已触达', following: '跟进中', quoted: '已报价', won: '已成交', dormant: '休眠',
-};
 
 const COLORS = ['#007AFF', '#34C759', '#FF9500', '#FF3B30', '#AF52DE', '#5856D6', '#FF6482', '#00C7BE'];
 
@@ -99,12 +96,12 @@ export default function AnalyticsPage() {
     );
   }
 
-  const funnelData = [
-    { name: '线索', value: data.statusBreakdown.reduce((s, i) => s + i.count, 0) },
-    { name: '已触达', value: data.statusBreakdown.find((s) => s.status === 'contacted')?.count || 0 },
-    { name: '跟进中', value: data.statusBreakdown.find((s) => s.status === 'following')?.count || 0 },
-    { name: '已成交', value: data.statusBreakdown.find((s) => s.status === 'won')?.count || 0 },
-  ];
+  const funnelData = STATUS_ORDER
+    .filter((s) => s !== 'lost' && s !== 'dormant')
+    .map((status) => ({
+      name: statusLabels[status] || status,
+      value: data.statusBreakdown.find((s) => s.status === status)?.count || 0,
+    }));
 
   return (
     <div className="space-y-6 animate-fade-in">

@@ -34,7 +34,10 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response, next: Next
       prisma.customer.findMany({
         where,
         include: { contacts: true, interactions: { take: 3, orderBy: { sentAt: 'desc' } } },
-        orderBy: { updatedAt: 'desc' },
+        orderBy: [
+          { firstContactDate: { sort: 'desc', nulls: 'last' } },
+          { createdAt: 'desc' },
+        ],
         skip,
         take: limitNum,
       }),
@@ -57,7 +60,7 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response, next: Nex
       size: z.string().optional(),
       website: z.string().optional(),
       score: z.number().min(0).max(100).optional().default(50),
-      status: z.enum(['lead', 'contacted', 'following', 'quoted', 'won', 'dormant']).optional().default('lead'),
+      status: z.enum(['lead', 'interested', 'contacted', 'following', 'quoted', 'negotiating', 'sampling', 'won', 'lost', 'dormant']).optional().default('lead'),
       customerType: z.enum(['end_user', 'distributor']).optional().nullable(),
       tags: z.array(z.string()).optional().default([]),
       source: z.string().optional().nullable(),
@@ -170,9 +173,147 @@ router.get('/ids', authenticate, async (req: AuthRequest, res: Response, next: N
     const customers = await prisma.customer.findMany({
       where: { userId: req.userId! },
       select: { id: true },
-      orderBy: { updatedAt: 'desc' },
+      orderBy: [
+        { firstContactDate: { sort: 'desc', nulls: 'last' } },
+        { createdAt: 'desc' },
+      ],
     });
-    res.json({ success: true, ids: customers.map((c) => c.id), total: customers.length });
+    res.json({ success: true, ids: customers.map((c: { id: string }) => c.id), total: customers.length });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ── Follow-up reminders (MUST be before /:id to avoid route conflict) ──
+router.get('/reminders', authenticate, async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const now = new Date();
+    const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const threeDaysLater = new Date(todayDate.getTime() + 3 * 86400000);
+
+    const customers = await prisma.customer.findMany({
+      where: {
+        userId: req.userId!,
+        nextFollowUp: { lte: threeDaysLater },
+        status: { notIn: ['won', 'lost', 'dormant'] },
+      },
+      select: {
+        id: true,
+        company: true,
+        nextFollowUp: true,
+        status: true,
+        country: true,
+      },
+      orderBy: { nextFollowUp: 'asc' },
+    });
+
+    // Categorize for the UI
+    const overdueItems: typeof customers = [];
+    const todayItems: typeof customers = [];
+    const upcomingItems: typeof customers = [];
+
+    for (const c of customers) {
+      if (!c.nextFollowUp) continue;
+      const d = new Date(c.nextFollowUp);
+      const dateOnly = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      if (dateOnly < todayDate) {
+        overdueItems.push(c);
+      } else if (dateOnly.getTime() === todayDate.getTime()) {
+        todayItems.push(c);
+      } else {
+        upcomingItems.push(c);
+      }
+    }
+
+    res.json({
+      success: true,
+      total: customers.length,
+      overdue: overdueItems.length,
+      today: todayItems.length,
+      upcoming: upcomingItems.length,
+      items: customers.map(c => ({
+        id: c.id,
+        company: c.company,
+        nextFollowUp: c.nextFollowUp,
+        status: c.status,
+        country: c.country,
+      })),
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ── Reminder stats (lightweight, for sidebar badge) ──
+router.get('/reminders/stats', authenticate, async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const now = new Date();
+    const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const threeDaysLater = new Date(todayDate.getTime() + 3 * 86400000);
+
+    const customers = await prisma.customer.findMany({
+      where: {
+        userId: req.userId!,
+        nextFollowUp: { lte: threeDaysLater },
+        status: { notIn: ['won', 'lost', 'dormant'] },
+      },
+      select: { nextFollowUp: true },
+    });
+
+    let overdue = 0;
+    let today = 0;
+    let upcoming = 0;
+
+    for (const c of customers) {
+      if (!c.nextFollowUp) continue;
+      const d = new Date(c.nextFollowUp);
+      const dateOnly = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      if (dateOnly < todayDate) overdue++;
+      else if (dateOnly.getTime() === todayDate.getTime()) today++;
+      else upcoming++;
+    }
+
+    res.json({ success: true, overdue, today, upcoming, total: customers.length });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ── Mark customer as followed up ──
+router.post('/:id/followed-up', authenticate, async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const schema = z.object({
+      days: z.number().min(1).max(90).optional().default(7),
+    });
+    const parsed = schema.parse(req.body);
+
+    const customer = await prisma.customer.findFirst({
+      where: { id, userId: req.userId! },
+    });
+    if (!customer) throw new AppError('Customer not found', 404);
+
+    const newDate = new Date();
+    newDate.setDate(newDate.getDate() + parsed.days);
+    newDate.setHours(0, 0, 0, 0);
+
+    const updated = await prisma.customer.update({
+      where: { id },
+      data: { nextFollowUp: newDate },
+    });
+
+    // Record a followup interaction
+    await prisma.interaction.create({
+      data: {
+        type: 'followup',
+        direction: 'outbound',
+        status: 'completed',
+        content: `Marked as followed up. Next follow-up: ${newDate.toISOString().slice(0, 10)}`,
+        customerId: id,
+      },
+    });
+
+    res.json({ success: true, customer: updated });
   } catch (err) {
     next(err);
   }
@@ -209,20 +350,24 @@ router.put('/:id', authenticate, async (req: AuthRequest, res: Response, next: N
       industry: z.string().optional(),
       country: z.string().optional(),
       size: z.string().optional(),
-      status: z.enum(['lead', 'contacted', 'following', 'quoted', 'won', 'dormant']).optional(),
+      status: z.enum(['lead', 'interested', 'contacted', 'following', 'quoted', 'negotiating', 'sampling', 'won', 'lost', 'dormant']).optional(),
       score: z.number().min(0).max(100).optional(),
       customerType: z.enum(['end_user', 'distributor']).optional().nullable(),
       tags: z.array(z.string()).optional(),
       notes: z.string().optional().nullable(),
       backgroundCheck: z.string().optional().nullable(),
       nextFollowUp: z.string().optional().nullable(),
+      firstContactDate: z.string().optional().nullable(),
     });
     const parsed = schema.parse(req.body);
 
-    // Convert nextFollowUp string to Date for Prisma
+    // Convert date strings to Date for Prisma
     const data: any = { ...parsed };
     if (parsed.nextFollowUp !== undefined) {
       data.nextFollowUp = parsed.nextFollowUp ? new Date(parsed.nextFollowUp) : null;
+    }
+    if (parsed.firstContactDate !== undefined) {
+      data.firstContactDate = parsed.firstContactDate ? new Date(parsed.firstContactDate) : null;
     }
 
     const updated = await prisma.customer.update({
@@ -566,42 +711,90 @@ router.post('/import', authenticate, upload.single('file'), async (req: AuthRequ
         continue;
       }
 
-      // Deduplicate: skip if same company exists for this user
-      let customerId: string;
-      if (data.company) {
-        const existing = await prisma.customer.findFirst({
-          where: { userId: req.userId!, company: data.company },
+      // 三步去重：email → whatsapp → 公司名+国家
+      let existingEmail = null;
+      let existingWhatsapp = null;
+      let existingCompany = null;
+
+      const recordEmail = record.email || '';
+      const recordWhatsapp = record.whatsapp || '';
+
+      // Step 1: match by email (primary contact)
+      if (recordEmail) {
+        existingEmail = await prisma.customer.findFirst({
+          where: { userId: req.userId!, contacts: { some: { email: recordEmail } } },
         });
-        if (existing) {
-          // Still track old->new ID for followup import
-          if (oldId) oldToNewIdMap[oldId] = existing.id;
-          // Import followups for existing customer too
-          if (followupsMap && oldId && followupsMap[oldId]) {
-            const fu = followupsMap[oldId];
-            const fuToCreate = fu
-              .filter(f => (f.content as string) || '')
-              .map(f => {
-                let c = (f.content as string) || '';
-                if (f.method) c = `【${f.method}】${c}`;
-                if (f.nextAction) c += `\n后续动作: ${f.nextAction}`;
-                return {
-                  type: 'note' as const,
-                  direction: 'inbound' as const,
-                  status: 'sent' as const,
-                  content: c,
-                  sentAt: f.date ? new Date(f.date as string) : new Date(),
-                  customerId: existing.id,
-                };
-              });
-            if (fuToCreate.length > 0) {
-              await prisma.interaction.createMany({ data: fuToCreate.slice(0, 100) });
-            }
-          }
-          skipped++;
-          continue;
-        }
       }
 
+      // Step 2: match by whatsapp (primary contact)
+      if (!existingEmail && recordWhatsapp) {
+        existingWhatsapp = await prisma.customer.findFirst({
+          where: { userId: req.userId!, contacts: { some: { whatsapp: recordWhatsapp } } },
+        });
+      }
+
+      // Step 3: match by company name + country (more precise than name alone)
+      if (!existingEmail && !existingWhatsapp && data.company && data.country) {
+        existingCompany = await prisma.customer.findFirst({
+          where: { userId: req.userId!, company: data.company, country: data.country },
+        });
+      }
+
+      // Fallback: match by company name alone (for backward compat)
+      if (!existingEmail && !existingWhatsapp && !existingCompany && data.company) {
+        existingCompany = await prisma.customer.findFirst({
+          where: { userId: req.userId!, company: data.company },
+        });
+      }
+
+      const existing = existingEmail || existingWhatsapp || existingCompany;
+      if (existing) {
+        // Track old->new ID for followup import
+        if (oldId) oldToNewIdMap[oldId] = existing.id;
+        // Update existing customer with mapped fields (stage, score, etc.)
+        await prisma.customer.update({
+          where: { id: existing.id },
+          data: {
+            status: data.status,
+            score: data.score,
+            customerType: data.customerType,
+            source: data.source,
+            firstContactDate: data.firstContactDate ?? undefined,
+            nextFollowUp: data.nextFollowUp ?? undefined,
+            // Only overwrite non-empty fields
+            ...(data.website ? { website: data.website } : {}),
+            ...(data.industry ? { industry: data.industry } : {}),
+            ...(data.country ? { country: data.country } : {}),
+            ...(data.size ? { size: data.size } : {}),
+          },
+        });
+        // Import followups for existing customer too
+        if (followupsMap && oldId && followupsMap[oldId]) {
+          const fu = followupsMap[oldId];
+          const fuToCreate = fu
+            .filter(f => (f.content as string) || '')
+            .map(f => {
+              let c = (f.content as string) || '';
+              if (f.method) c = `【${f.method}】${c}`;
+              if (f.nextAction) c += `\n后续动作: ${f.nextAction}`;
+              return {
+                type: 'note' as const,
+                direction: 'inbound' as const,
+                status: 'sent' as const,
+                content: c,
+                sentAt: f.date ? new Date(f.date as string) : new Date(),
+                customerId: existing.id,
+              };
+            });
+          if (fuToCreate.length > 0) {
+            await prisma.interaction.createMany({ data: fuToCreate.slice(0, 100) });
+          }
+        }
+        skipped++;
+        continue;
+      }
+
+      let customerId: string;
       const created = await prisma.customer.create({
         data: {
           company: data.company,
@@ -615,6 +808,8 @@ router.post('/import', authenticate, upload.single('file'), async (req: AuthRequ
           tags: data.tags,
           source: data.source,
           notes: data.notes,
+          firstContactDate: data.firstContactDate,
+          nextFollowUp: data.nextFollowUp,
           userId: req.userId!,
           contacts: data.contacts,
         },
@@ -665,7 +860,7 @@ router.post('/import', authenticate, upload.single('file'), async (req: AuthRequ
         }
       }
 
-      // 2. From firstContactDate
+      // 2. From firstContactDate (legitimate interaction)
       if (record.firstContactDate) {
         const fcDate = record.firstContactDate;
         let contactContent = `【首次联系】日期: ${fcDate}`;
@@ -679,52 +874,25 @@ router.post('/import', authenticate, upload.single('file'), async (req: AuthRequ
         });
       }
 
-      // 3. From corePainPoints
-      if (record.corePainPoints) {
-        interactionsToCreate.push({
-          type: 'note', direction: 'inbound', status: 'sent',
-          content: `【客户痛点】\n${record.corePainPoints}`,
-          sentAt: record.nextFollowUp ? new Date(record.nextFollowUp) : new Date(),
-          customerId: customerId,
-        });
-      }
-
-      // 4. From currentCapacity + currentEquipment (production info)
-      const prodInfo = [record.currentCapacity, record.currentEquipment].filter(Boolean).join('\n\n');
-      if (prodInfo) {
-        interactionsToCreate.push({
-          type: 'note', direction: 'inbound', status: 'sent',
-          content: `【产能与设备】\n${prodInfo}`,
-          sentAt: new Date(),
-          customerId: customerId,
-        });
-      }
-
-      // 5. From mainIndustries (industry info)
-      if (record.mainIndustries) {
-        interactionsToCreate.push({
-          type: 'note', direction: 'inbound', status: 'sent',
-          content: `【目标行业】\n${record.mainIndustries}`,
-          sentAt: new Date(),
-          customerId: customerId,
-        });
-      }
-
-      // 6. From budget/expectedPurchaseTime
-      const purchaseInfo = [record.budget, record.expectedPurchaseTime].filter(Boolean).join(' | ');
-      if (purchaseInfo) {
-        interactionsToCreate.push({
-          type: 'note', direction: 'inbound', status: 'sent',
-          content: `【采购计划】\n${purchaseInfo}`,
-          sentAt: new Date(),
-          customerId: customerId,
-        });
-      }
-
       // Batch create all interactions (max 100 per customer)
       if (interactionsToCreate.length > 0) {
         await prisma.interaction.createMany({
           data: interactionsToCreate.slice(0, 100),
+        });
+      }
+
+      // Build backgroundCheck from factory profile fields (not interactions!)
+      const bgParts: string[] = [];
+      if (record.corePainPoints) bgParts.push(`【核心痛点】\n${record.corePainPoints}`);
+      const prodInfo = [record.currentCapacity, record.currentEquipment].filter(Boolean).join('\n\n');
+      if (prodInfo) bgParts.push(`【产能与设备】\n${prodInfo}`);
+      if (record.mainIndustries) bgParts.push(`【主要下游行业】\n${record.mainIndustries}`);
+      const purchaseInfo = [record.budget, record.expectedPurchaseTime].filter(Boolean).join(' | ');
+      if (purchaseInfo) bgParts.push(`【采购计划】\n${purchaseInfo}`);
+      if (bgParts.length > 0) {
+        await prisma.customer.update({
+          where: { id: customerId },
+          data: { backgroundCheck: bgParts.join('\n\n') },
         });
       }
 

@@ -148,9 +148,10 @@ router.post('/:id/send', authenticate, async (req: AuthRequest, res: Response, n
       include: { contacts: { where: { isPrimary: true } } },
     });
 
+    type RecipientCustomer = { company?: string | null; contacts: { email: string | null; name: string | null; whatsapp?: string | null }[] };
     const recipients = customers
-      .filter((c) => c.contacts.length > 0)
-      .map((c) => ({
+      .filter((c: RecipientCustomer) => c.contacts.length > 0)
+      .map((c: RecipientCustomer) => ({
         email: c.contacts[0].email!,
         variables: {
           company: c.company || 'Customer',
@@ -236,7 +237,7 @@ router.post('/whatsapp/generate', authenticate, async (req: AuthRequest, res: Re
     const user = await prisma.user.findUnique({ where: { id: req.userId! } });
     if (!user) throw new AppError('User not found', 404);
 
-    const contact = customer.contacts.find((c) => c.whatsapp);
+    const contact = customer.contacts.find((c: { whatsapp?: string | null }) => c.whatsapp);
     const productInfo = user.products ? JSON.stringify(user.products) : 'Our products';
 
     const message = await aiService.generateWhatsAppMessage({
@@ -272,7 +273,7 @@ router.post('/whatsapp/send', authenticate, async (req: AuthRequest, res: Respon
     });
     if (!customer) throw new AppError('Customer not found', 404);
 
-    const contact = customer.contacts.find((c) => c.whatsapp);
+    const contact = customer.contacts.find((c: { whatsapp?: string | null }) => c.whatsapp);
     if (!contact?.whatsapp) throw new AppError('No WhatsApp number found for this customer', 400);
 
     const user = await prisma.user.findUnique({ where: { id: req.userId! } });

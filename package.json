@@ -49,7 +49,7 @@
       },
       {
         "from": "setup-win.bat",
-        "to": "../setup-win.bat"
+        "to": "backend/setup-win.bat"
       },
       {
         "from": "backend/node_modules",

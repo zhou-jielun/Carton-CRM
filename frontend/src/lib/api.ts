@@ -52,6 +52,15 @@ class ApiClient {
     return data;
   }
 
+  // Convenience methods
+  get<T>(endpoint: string) {
+    return this.request<T>(endpoint);
+  }
+
+  post<T>(endpoint: string, body: Record<string, unknown>) {
+    return this.request<T>(endpoint, { method: 'POST', body });
+  }
+
   // Auth
   register(email: string, password: string, name?: string) {
     return this.request<{ success: boolean; token: string; user: any }>('/auth/register', {
