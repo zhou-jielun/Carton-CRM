@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Bell, Clock, AlertTriangle, Calendar, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '@/lib/api';
 import { statusLabels } from '@/lib/statusConfig';
+import { useReminderRefresh } from '@/lib/reminderEvents';
 
 interface ReminderItem {
   id: string;
@@ -50,7 +51,7 @@ export function NotificationBell() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const fetchReminders = async () => {
+  const fetchReminders = useCallback(async () => {
     setLoading(true);
     try {
       const data = await api.get<RemindersData>('/customers/reminders');
@@ -60,14 +61,17 @@ export function NotificationBell() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  // Initial fetch on mount for badge count
+  // Initial fetch on mount for badge count + poll every 30s
   useEffect(() => {
     fetchReminders();
-    const interval = setInterval(fetchReminders, 60000);
+    const interval = setInterval(fetchReminders, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchReminders]);
+
+  // Listen for real-time refresh events (from CustomerDetail save)
+  useReminderRefresh(fetchReminders);
 
   const handleToggle = () => {
     if (!open && !data) {

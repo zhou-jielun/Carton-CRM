@@ -38,6 +38,7 @@ import {
 import { timeAgo } from '@/lib/utils';
 import { getCountryFlag } from '@/lib/countryFlags';
 import { statusLabels, statusChipStyles } from '@/lib/statusConfig';
+import { dispatchReminderRefresh } from '@/lib/reminderEvents';
 
 function scoreToGrade(score: number): { grade: string; color: string; bg: string; label: string } {
   if (score >= 80) return { grade: 'A', color: '#388E3C', bg: '#E8F5E9', label: '优质' };
@@ -278,6 +279,10 @@ export default function CustomerDetailPage() {
       const data = await res.json();
       if (data.success) {
         setCustomer((prev) => prev ? { ...prev, ...data.customer } : null);
+        // Refresh reminder badges if follow-up date changed
+        if ('nextFollowUp' in fields) {
+          dispatchReminderRefresh();
+        }
         toast('success', '已更新');
       } else {
         toast('error', data.message || '更新失败');

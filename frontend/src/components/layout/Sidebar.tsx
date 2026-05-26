@@ -1,7 +1,8 @@
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { X, LayoutDashboard, Users, Mail, MessageSquare, Search, Settings, BarChart3, Clock, Building2, Bell } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useReminderRefresh } from '@/lib/reminderEvents';
 
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: '仪表盘' },
@@ -24,26 +25,30 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const [reminderBadge, setReminderBadge] = useState(0);
 
   // Poll reminder stats for sidebar badge
-  useEffect(() => {
-    const fetchBadge = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-        const res = await fetch('/api/customers/reminders/stats', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-        if (data.success) {
-          setReminderBadge(data.overdue + data.today);
-        }
-      } catch {
-        // silent
+  const fetchBadge = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      const res = await fetch('/api/customers/reminders/stats', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (data.success) {
+        setReminderBadge(data.overdue + data.today);
       }
-    };
-    fetchBadge();
-    const interval = setInterval(fetchBadge, 60000);
-    return () => clearInterval(interval);
+    } catch {
+      // silent
+    }
   }, []);
+
+  useEffect(() => {
+    fetchBadge();
+    const interval = setInterval(fetchBadge, 30000);
+    return () => clearInterval(interval);
+  }, [fetchBadge]);
+
+  // Listen for real-time refresh events (from CustomerDetail save)
+  useReminderRefresh(fetchBadge);
 
   const sidebarContent = (
     <div className="flex flex-col h-full bg-white dark:bg-[#1C1C1E]">
