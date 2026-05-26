@@ -62,8 +62,15 @@ export function NotificationBell() {
     }
   };
 
+  // Initial fetch on mount for badge count
+  useEffect(() => {
+    fetchReminders();
+    const interval = setInterval(fetchReminders, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
   const handleToggle = () => {
-    if (!open) {
+    if (!open && !data) {
       fetchReminders();
     }
     setOpen(!open);
