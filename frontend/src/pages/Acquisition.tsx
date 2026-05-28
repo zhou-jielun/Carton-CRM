@@ -262,6 +262,60 @@ export default function AcquisitionPage() {
     }
   };
 
+  const handleExportKeywords = () => {
+    if (!keywordsData) return;
+
+    const wb = XLSX.utils.book_new();
+
+    // Sheet 1: Google 搜索关键词
+    const searchRows = keywordsData.googleSearchTerms.map((term, i) => ({
+      '序号': i + 1,
+      '关键词': term,
+      '来源': 'Google 搜索',
+      '目标市场': targetCountry,
+      '产品类别': productCategory,
+      '客户类型': targetCustomerType || '不限',
+      '补充说明': additionalNotes || '',
+    }));
+    const ws1 = XLSX.utils.json_to_sheet(searchRows);
+    ws1['!cols'] = [
+      { wch: 6 }, { wch: 60 }, { wch: 14 }, { wch: 12 }, { wch: 24 }, { wch: 12 }, { wch: 30 },
+    ];
+    XLSX.utils.book_append_sheet(wb, ws1, 'Google搜索');
+
+    // Sheet 2: Google Maps 搜索词
+    const mapsRows = keywordsData.googleMapsQueries.map((term, i) => ({
+      '序号': i + 1,
+      '关键词': term,
+      '来源': 'Google Maps',
+      '目标市场': targetCountry,
+      '产品类别': productCategory,
+      '客户类型': targetCustomerType || '不限',
+    }));
+    const ws2 = XLSX.utils.json_to_sheet(mapsRows);
+    ws2['!cols'] = [
+      { wch: 6 }, { wch: 60 }, { wch: 14 }, { wch: 12 }, { wch: 24 }, { wch: 12 },
+    ];
+    XLSX.utils.book_append_sheet(wb, ws2, 'Google Maps');
+
+    // Sheet 3: LinkedIn + 搜索策略
+    const metaRows = [
+      { '项目': 'LinkedIn 搜索建议', '内容': keywordsData.linkedinFilters || '' },
+      { '项目': 'AI 搜索策略', '内容': keywordsData.explanation || '' },
+      { '项目': '', '内容': '' },
+      { '项目': '目标市场', '内容': targetCountry },
+      { '项目': '产品类别', '内容': productCategory },
+      { '项目': '客户类型', '内容': targetCustomerType || '不限' },
+      { '项目': '补充说明', '内容': additionalNotes || '' },
+    ];
+    const ws3 = XLSX.utils.json_to_sheet(metaRows);
+    ws3['!cols'] = [{ wch: 20 }, { wch: 80 }];
+    XLSX.utils.book_append_sheet(wb, ws3, '搜索策略');
+
+    XLSX.writeFile(wb, `AI获客-关键词-${targetCountry || '客户'}-${new Date().toISOString().slice(0, 10)}.xlsx`);
+    toast('success', `已导出关键词到 Excel（3个表格）`);
+  };
+
   const handleExportExcel = () => {
     if (leads.length === 0) return;
 
@@ -530,6 +584,13 @@ export default function AcquisitionPage() {
             >
               <ArrowLeft className="w-4 h-4" />
               返回修改
+            </button>
+            <button
+              onClick={handleExportKeywords}
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-body font-medium text-white bg-[#217346] hover:bg-[#185A2D] transition-colors rounded-[10px]"
+            >
+              <Download className="w-4 h-4" />
+              导出关键词
             </button>
             <button
               onClick={() => setStep(3)}
