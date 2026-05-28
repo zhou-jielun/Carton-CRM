@@ -17,7 +17,9 @@ import {
   ExternalLink,
   RefreshCw,
   UserPlus,
+  Download,
 } from 'lucide-react';
+import * as XLSX from 'xlsx';
 
 type Step = 1 | 2 | 3;
 
@@ -258,6 +260,48 @@ export default function AcquisitionPage() {
     } finally {
       setImporting(false);
     }
+  };
+
+  const handleExportExcel = () => {
+    if (leads.length === 0) return;
+
+    const confidenceLabels: Record<string, string> = {
+      high: '高匹配',
+      medium: '中匹配',
+      low: '低匹配',
+    };
+
+    const rows = leads.map((lead) => ({
+      '公司名': lead.company,
+      '行业': lead.industry,
+      '客户国家': lead.country,
+      '网址': lead.website,
+      '邮箱': lead.email,
+      '电话': lead.phone,
+      '公司描述': lead.description,
+      '匹配度': confidenceLabels[lead.confidence] || lead.confidence,
+      '目标市场': targetCountry,
+      '产品类别': productCategory,
+      '客户类型': targetCustomerType || '不限',
+      '补充说明': additionalNotes || '',
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(rows);
+
+    // Auto-adjust column widths
+    const colWidths = Object.keys(rows[0]).map((key) => {
+      const maxLen = Math.max(
+        key.length * 2, // Chinese chars are ~2x width
+        ...rows.map((r: Record<string, string>) => String(r[key] || '').length),
+      );
+      return { wch: Math.min(maxLen + 4, 50) };
+    });
+    ws['!cols'] = colWidths;
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, '潜在客户');
+    XLSX.writeFile(wb, `AI获客-${targetCountry || '客户'}-${new Date().toISOString().slice(0, 10)}.xlsx`);
+    toast('success', `已导出 ${leads.length} 个客户到 Excel`);
   };
 
   const inputClass = 'w-full h-10 px-3 rounded-[8px] border border-apple-border text-body text-apple-black bg-white placeholder:text-apple-tetriary focus:outline-none focus:ring-2 focus:ring-apple-blue/40 transition-all duration-300';
@@ -566,6 +610,13 @@ PackMaster Co. - Leading packaging solutions provider in Istanbul. www.packmaste
                   <p className="text-caption text-apple-secondary">勾选要导入的客户，然后点击「导入CRM」</p>
                 </div>
                 <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleExportExcel}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-caption font-medium text-white bg-[#217346] hover:bg-[#185A2D] transition-colors rounded-[8px]"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    导出 Excel
+                  </button>
                   <button
                     onClick={() => { setLeads([]); setRawText(''); }}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 text-caption text-apple-secondary hover:text-apple-black transition-colors rounded-[8px]"
